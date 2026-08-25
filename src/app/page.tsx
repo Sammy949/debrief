@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
-import { ShaderField } from "@/components/shader-field";
 
 const STAGES = [
   { name: "Explain", copy: "Say it in your own words, from memory.", accent: false },
@@ -35,9 +34,7 @@ export default function Home() {
       <main className="flex flex-1 flex-col">
         {/* ---- hero: editorial, off-axis, over a living paper-shader field ---- */}
         <section className="relative isolate flex min-h-[80vh] items-center overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <ShaderField className="h-full w-full" />
-          </div>
+          <div className="hero-atmos absolute inset-0 z-0" aria-hidden="true" />
           {/* feather the shader into the paper below — no hard seam */}
           <div
             className="absolute inset-x-0 bottom-0 z-0 h-40 bg-gradient-to-b from-transparent to-paper"

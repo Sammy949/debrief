@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Debrief · Understanding Map · design study</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+<style>
+  /* ------------------------------------------------------------------ *
+   *  DEBRIEF — WORLD A (warm drafting table).  Design-token forge.
+   *  These values port straight into the Next scaffold's theme.
+   * ------------------------------------------------------------------ */
+  :root{
+    --paper:      #F1EDE3;   /* warm off-white, desaturated off cream         */
+    --paper-deep: #E7E1D2;   /* receded / layered surface, tonal separators   */
+    --ink:        #1B1712;   /* warm near-black (never blue-charcoal)          */
+    --ink-soft:   #6E6656;   /* dimmed ink: unclear / secondary (warm)        */
+    --ink-untested:#7A7061;  /* untested TEXT: de-emphasised but legible       */
+    --ink-ghost:  #948A76;   /* ghost MARKS only: dotted rule, crop ticks      */
+    --sienna:     #9A5A2C;   /* tonal accent: focus / attention               */
+    --sienna-deep:#6F3D1B;   /* deeper accent: the fracture                   */
+
+    --rule-w: 112px;         /* load-path length                              */
+    --ease:   cubic-bezier(.2,.75,.25,1);
+    --dur:    220ms;         /* the repair beat                               */
+
+    --f: 'Satoshi', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ margin:0; }
+  body{
+    font-family:var(--f);
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    display:flex; flex-direction:column; align-items:center;
+    padding:clamp(1.5rem,5vw,4rem) 1.25rem 3rem;
+  }
+
+  /* fine grain on the substrate (behind everything, never over text) */
+  .grain{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    opacity:.05; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .sheet{
+    position:relative; z-index:1;
+    width:100%; max-width:900px;
+    padding:clamp(1.25rem,4vw,2.75rem);
+  }
+
+  /* subtle drafting crop marks (sparing, per the blueprint exception) */
+  .crop{ position:absolute; width:10px; height:10px; opacity:.5; }
+  .crop::before,.crop::after{ content:""; position:absolute; background:var(--ink-ghost); }
+  .crop::before{ width:10px; height:1px; }   /* horizontal arm */
+  .crop::after { width:1px;  height:10px; }  /* vertical arm   */
+  .crop.tl{ top:-2px; left:-2px  } .crop.tl::before{ top:0; left:0  } .crop.tl::after{ top:0; left:0  }
+  .crop.tr{ top:-2px; right:-2px } .crop.tr::before{ top:0; right:0 } .crop.tr::after{ top:0; right:0 }
+  .crop.bl{ bottom:-2px; left:-2px  } .crop.bl::before{ bottom:0; left:0  } .crop.bl::after{ bottom:0; left:0  }
+  .crop.br{ bottom:-2px; right:-2px } .crop.br::before{ bottom:0; right:0 } .crop.br::after{ bottom:0; right:0 }
+
+  .colophon{
+    font-size:.72rem; font-weight:500; letter-spacing:.02em;
+    color:var(--ink-soft); text-align:center; margin-bottom:2.75rem;
+  }
+
+  /* ---- concept: the load, sitting above its supports ---- */
+  .concept{ text-align:center; margin-bottom:2.9rem; }
+  .concept h1{
+    font-weight:700; font-size:clamp(2rem,5vw,2.7rem);
+    letter-spacing:-.015em; margin:0 0 .4rem;
+  }
+  .concept p{
+    font-weight:500; font-size:.98rem; color:var(--ink-soft); margin:0;
+  }
+
+  /* ---- the members (claims bearing the load) ---- */
+  .members{
+    display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-start;
+    gap:clamp(1.4rem,4vw,2.6rem); margin-bottom:3rem;
+  }
+  .member{ display:flex; flex-direction:column; align-items:center; text-align:center; width:150px; }
+  /* reserve equal label space + bottom-align so every rule lands on one line */
+  .member .label{
+    font-weight:500; font-size:.95rem; line-height:1.32; color:var(--ink);
+    min-height:4.1em; margin-bottom:.7rem;
+    display:grid; align-content:end; text-align:center;
+  }
+  .member.recede .label{ color:var(--ink-soft); font-weight:400; }
+  .member.focus  .label{ font-weight:700; }
+
+  .state{ font-weight:500; font-size:.74rem; margin-top:.6rem; }
+  .s-solid{ color:var(--ink); }
+  .s-unclear{ color:var(--ink-soft); }
+  .s-attention{ color:var(--sienna-deep); }
+  .s-untested{ color:var(--ink-untested); }
+
+  /* ---- the load-path rule: state written in one line ---- */
+  .rule{ display:inline-flex; align-items:center; height:14px; }
+  .rule .bar{
+    height:2px; border-radius:999px; background:var(--ink);
+    transition:width var(--dur) var(--ease), transform var(--dur) var(--ease),
+               background var(--dur) var(--ease), opacity var(--dur) var(--ease);
+  }
+  .rule .gap{ width:0; transition:width var(--dur) var(--ease); }
+  .rule .right{ width:0; }
+
+  /* solid — one complete member, carrying its load */
+  .rule.solid .left{ width:var(--rule-w); }
+
+  /* unclear — present but under-drawn (fades out, never fully realised) */
+  .rule.unclear .left{
+    width:var(--rule-w); background:var(--ink-soft);
+    -webkit-mask-image:linear-gradient(90deg,#000 52%,transparent);
+            mask-image:linear-gradient(90deg,#000 52%,transparent);
+  }
+
+  /* untested — a member never built */
+  .rule.untested .left{
+    width:var(--rule-w); height:0; background:none; border-radius:0;
+    border-top:2px dotted var(--ink-ghost);
+  }
+
+  /* needs attention — the fracture: two halves that don't meet */
+  .rule.fractured .left { width:52px; background:var(--sienna-deep); transform:translateY(-3px); }
+  .rule.fractured .gap  { width:12px; }
+  .rule.fractured .right{ width:44px; background:var(--sienna-deep); transform:translateY(3px); }
+
+  /* repaired — the halves draw together into one continuous line */
+  .rule.fractured.repaired .left { width:var(--rule-w); background:var(--ink); transform:translateY(0); }
+  .rule.fractured.repaired .gap  { width:0; }
+  .rule.fractured.repaired .right{ width:0; background:var(--ink); transform:translateY(0); }
+
+  /* ---- focus detail ---- */
+  .detail{
+    max-width:560px; margin:0 auto;
+    border-top:1px solid var(--paper-deep); padding-top:2rem;
+  }
+  .detail .eyebrow{ font-size:.74rem; font-weight:500; color:var(--ink-soft); margin:0 0 .3rem; }
+  .detail .claim{ font-size:1.15rem; font-weight:700; margin:0 0 .2rem; letter-spacing:-.01em; }
+  .detail .breakline{ font-size:.8rem; font-weight:500; color:var(--sienna-deep); margin:0 0 1.4rem; }
+
+  .quote{
+    font-size:1.02rem; line-height:1.5; color:var(--ink);
+    padding-left:.95rem; border-left:2px solid var(--sienna); border-radius:1px;
+    margin:0 0 1.7rem;
+  }
+
+  .question .eyebrow{ margin-bottom:.35rem; }
+  .question p{ font-size:1.05rem; line-height:1.45; font-weight:500; margin:0 0 1.7rem; }
+
+  .controls{ display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+  .btn{
+    font:inherit; font-weight:500; font-size:.9rem;
+    color:var(--paper); background:var(--ink);
+    border:none; border-radius:8px; padding:.62rem 1.15rem; cursor:pointer;
+    transition:background .18s var(--ease);
+  }
+  .btn:hover{ background:var(--sienna-deep); }
+  .btn:focus-visible{ outline:2px solid var(--sienna); outline-offset:3px; }
+  .trajectory{ font-size:.82rem; font-weight:500; color:var(--ink-soft); }
+  .trajectory b{ color:var(--ink); font-weight:700; }
+
+  /* ---- state-language specimen (the token legend) ---- */
+  .legend{
+    position:relative; z-index:1; width:100%; max-width:900px;
+    margin-top:3.5rem; padding-top:1.6rem; border-top:1px solid var(--paper-deep);
+  }
+  .legend h2{ font-size:.74rem; font-weight:500; color:var(--ink-soft); margin:0 0 1.4rem; text-align:center; }
+  .legend .row{ display:flex; flex-wrap:wrap; justify-content:center; gap:clamp(1.2rem,4vw,2.4rem); }
+  .legend .spec{ display:flex; flex-direction:column; align-items:center; gap:.55rem; }
+  .legend .spec .name{ font-size:.78rem; font-weight:500; }
+
+  @media (prefers-reduced-motion: reduce){
+    .rule .bar, .rule .gap{ transition:none; }
+    .btn{ transition:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <main class="sheet">
+    <span class="crop tl" aria-hidden="true"></span>
+    <span class="crop tr" aria-hidden="true"></span>
+    <span class="crop bl" aria-hidden="true"></span>
+    <span class="crop br" aria-hidden="true"></span>
+
+    <p class="colophon">Debrief · understanding map · design study · World A</p>
+
+    <header class="concept">
+      <h1>Closures</h1>
+      <p>What your explanation is carrying.</p>
+    </header>
+
+    <section class="members" aria-label="Understanding map">
+      <div class="member recede">
+        <span class="label">Retains surrounding scope</span>
+        <span class="rule solid"><span class="bar left"></span><span class="gap"></span><span class="bar right"></span></span>
+        <span class="state s-solid">solid</span>
+      </div>
+
+      <div class="member recede">
+        <span class="label">Access persists after the outer call returns</span>
+        <span class="rule unclear"><span class="bar left"></span><span class="gap"></span><span class="bar right"></span></span>
+        <span class="state s-unclear">unclear</span>
+      </div>
+
+      <div class="member focus">
+        <span class="label">Captures the variable, not a copied value</span>
+        <span class="rule fractured" id="focusRule"><span class="bar left"></span><span class="gap"></span><span class="bar right"></span></span>
+        <span class="state s-attention" id="focusState">needs attention</span>
+      </div>
+
+      <div class="member recede">
+        <span class="label">Each closure keeps its own environment</span>
+        <span class="rule untested"><span class="bar left"></span><span class="gap"></span><span class="bar right"></span></span>
+        <span class="state s-untested">not reached yet</span>
+      </div>
+    </section>
+
+    <section class="detail" aria-label="Focus point">
+      <p class="eyebrow">focus point</p>
+      <p class="claim">Captures the variable, not a copied value</p>
+      <p class="breakline" id="breakline">where the explanation stops holding</p>
+
+      <blockquote class="quote">A closure stores the value of the variable at the moment the function is created.</blockquote>
+
+      <div class="question">
+        <p class="eyebrow">a curious question</p>
+        <p>If the outer variable changes after the function is created but before it runs, what does the function see?</p>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="repairBtn" aria-pressed="false">Play repair</button>
+        <span class="trajectory" id="trajectory" hidden>Captures the variable: <b>needs attention → solid</b></span>
+      </div>
+    </section>
+  </main>
+
+  <section class="legend" aria-label="State language">
+    <h2>state language · read without colour</h2>
+    <div class="row">
+      <div class="spec">
+        <span class="rule solid"><span class="bar left"></span><span class="gap"></span><span class="bar right"></span></span>
+        <span class="name s-solid">solid</span>
+      </div>
+      <div class="spec">
+        <span class="rule unclear"><span class="bar left"></span><span class="gap"></span><span class="bar right"></span></span>
+        <span class="name s-unclear">unclear</span>
+      </div>
+      <div class="spec">
+        <span class="rule fractured"><span class="bar left"></span><span class="gap"></span><span class="bar right"></span></span>
+        <span class="name s-attention">needs attention</span>
+      </div>
+      <div class="spec">
+        <span class="rule untested"><span class="bar left"></span><span class="gap"></span><span class="bar right"></span></span>
+        <span class="name s-untested">not reached yet</span>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (function(){
+      var rule = document.getElementById('focusRule');
+      var btn  = document.getElementById('repairBtn');
+      var word = document.getElementById('focusState');
+      var traj = document.getElementById('trajectory');
+      var brk  = document.getElementById('breakline');
+      var repaired = false;
+      btn.addEventListener('click', function(){
+        repaired = !repaired;
+        rule.classList.toggle('repaired', repaired);
+        word.textContent = repaired ? 'solid' : 'needs attention';
+        word.className = 'state ' + (repaired ? 's-solid' : 's-attention');
+        brk.textContent = repaired ? 'held after repair' : 'where the explanation stops holding';
+        brk.style.color = repaired ? 'var(--ink-soft)' : 'var(--sienna-deep)';
+        traj.hidden = !repaired;
+        btn.textContent = repaired ? 'Reset' : 'Play repair';
+        btn.setAttribute('aria-pressed', String(repaired));
+      });
+    })();
+  </script>
+</body>
+</html>

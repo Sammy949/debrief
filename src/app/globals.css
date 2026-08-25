@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------- World A — warm drafting table ------------------------- *
+ * Ink on warm paper, one tonal sienna accent. No traffic-light colour, no glow.
+ * Tokens forged in design/map-study.html.
+ * -------------------------------------------------------------------------------- */
+:root {
+  --paper:        #f1ede3;
+  --paper-deep:   #e7e1d2;
+  --ink:          #1b1712;
+  --ink-soft:     #6e6656;
+  --ink-untested: #7a7061;
+  --ink-ghost:    #948a76;
+  --sienna:       #9a5a2c;
+  --sienna-deep:  #6f3d1b;
+
+  /* shadcn semantic tokens mapped onto World A */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--paper-deep);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-deep);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--paper-deep);
+  --accent-foreground: var(--sienna-deep);
+  --destructive: var(--sienna-deep);
+  --border: var(--paper-deep);
+  --input: var(--paper-deep);
+  --ring: var(--sienna);
+
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* brand utilities: bg-paper / text-ink / text-sienna / border-paper-deep ... */
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-untested: var(--ink-untested);
+  --color-ink-ghost: var(--ink-ghost);
+  --color-sienna: var(--sienna);
+  --color-sienna-deep: var(--sienna-deep);
+
+  --font-sans: var(--font-satoshi);
+  --font-heading: var(--font-satoshi);
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+/* fine grain on the substrate — behind content, never over text */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

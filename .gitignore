@@ -45,3 +45,6 @@ next-env.d.ts
 
 # convex local state
 .convex/
+
+# personal notes (local only, never pushed)
+notes/private/

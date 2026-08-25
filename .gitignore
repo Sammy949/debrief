@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# next.js / build output
+.next/
+out/
+dist/
+build/
+
+# env & secrets
+.env
+.env*.local
+
+# vercel / convex local state
+.vercel/
+.convex/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# os / editor cruft
+.DS_Store
+Thumbs.db
+
+# claude: keep shared settings.json, ignore personal local settings
+.claude/settings.local.json

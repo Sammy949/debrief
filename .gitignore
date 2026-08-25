@@ -1,31 +1,47 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
 # dependencies
-node_modules/
-.pnpm-store/
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# next.js / build output
-.next/
-out/
-dist/
-build/
+# testing
+/coverage
 
-# env & secrets
-.env
-.env*.local
+# next.js
+/.next/
+/out/
 
-# vercel / convex local state
-.vercel/
-.convex/
+# production
+/build
 
-# logs
-*.log
+# misc
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
-pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-# os / editor cruft
-.DS_Store
-Thumbs.db
+# env files (can opt-in for committing if needed)
+.env*
 
-# claude: keep shared settings.json, ignore personal local settings
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# claude local settings
 .claude/settings.local.json
+
+# convex local state
+.convex/

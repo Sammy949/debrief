@@ -33,15 +33,8 @@ export default function Home() {
 
       <main className="flex flex-1 flex-col">
         {/* ---- hero: editorial, off-axis, over a living paper-shader field ---- */}
-        <section className="relative isolate flex min-h-[80vh] items-center overflow-hidden">
-          <div className="hero-atmos absolute inset-0 z-0" aria-hidden="true" />
-          {/* feather the shader into the paper below — no hard seam */}
-          <div
-            className="absolute inset-x-0 bottom-0 z-0 h-40 bg-gradient-to-b from-transparent to-paper"
-            aria-hidden="true"
-          />
-
-          <div className="relative z-10 mx-auto w-full max-w-6xl px-6 py-24">
+        <section className="flex min-h-[80vh] items-center">
+          <div className="mx-auto w-full max-w-6xl px-6 py-24">
             <div className="max-w-[40rem]">
               <h1 className="text-balance font-heading text-[clamp(2rem,4.6vw,3rem)] font-bold leading-[1.1] tracking-tight text-ink">
                 Understanding isn&apos;t real until the explanation{" "}

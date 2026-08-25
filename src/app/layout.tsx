@@ -22,8 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${satoshi.variable} antialiased`}>
       <body>
-        <div className="grain-overlay" aria-hidden="true" />
-        <div className="relative z-10 flex min-h-screen flex-col">{children}</div>
+        <div className="flex min-h-screen flex-col">{children}</div>
       </body>
     </html>
   );

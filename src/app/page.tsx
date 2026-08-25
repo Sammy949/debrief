@@ -55,7 +55,7 @@ export default function Home() {
 
               <div className="mt-10">
                 <Link
-                  href="/lessons"
+                  href="/debrief/new"
                   className="group inline-flex items-center gap-2 rounded-md bg-ink px-6 py-3 text-base font-medium text-paper transition-colors hover:bg-sienna-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sienna"
                 >
                   Start a debrief

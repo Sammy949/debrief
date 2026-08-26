@@ -37,8 +37,15 @@ export const VERDICTS = [
 ] as const;
 export type Verdict = (typeof VERDICTS)[number];
 
-/** Whether the single probe targets a weakness or (all-solid) verifies transfer. */
-export type FocusKind = "weakness" | "verification";
+/**
+ * What the single probe is doing, which decides its whole tone:
+ * - `weakness`: the learner wrote something wrong or vague — probe the weak point.
+ * - `unaddressed`: the learner never touched this part — invite them into it (no
+ *   implied claim, no "what if"). Distinct from `verification`: an untested claim
+ *   is a gap, not a solid answer waiting to be stress-tested.
+ * - `verification`: EVERY claim is solid — a transfer check that it holds in a new case.
+ */
+export type FocusKind = "weakness" | "unaddressed" | "verification";
 
 // ---------------------------------------------------------------------------
 // Lesson scaffold — authored content, the source of truth for teaching.
@@ -61,13 +68,25 @@ export interface Lesson {
   title: string;
   objective: string;
   difficulty: "foundations" | "intermediate" | "advanced";
+  /**
+   * `authored`: a curated lesson with claims written in advance (source of truth
+   * for teaching). `open`: a learner-named concept — claims are NOT known up front;
+   * they are decomposed from the learner's own explanation at submit time, so the
+   * shell begins with an empty `claims` array. Only the open path re-derives claims.
+   */
+  mode: "authored" | "open";
   claims: LessonClaim[];
   workedExample: string;
   counterexample: string;
   applicationScenarios: string[];
   misconceptions: string[];
-  /** Demo-safety: used if the AI call times out or fails validation twice. */
-  fallbackCuriousQuestion: string;
+  /**
+   * Demo-safety: used if the AI call times out or fails validation. One per
+   * FocusKind so the fallback matches the probe the learner actually got.
+   */
+  fallbackWeaknessQuestion: string;
+  fallbackUnaddressedQuestion: string;
+  fallbackVerificationQuestion: string;
   fallbackRepairQuestion: string;
 }
 

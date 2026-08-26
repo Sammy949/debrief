@@ -47,8 +47,16 @@ export const repairQuestionSchema = z.object({
   type: z.enum(["apply", "why"]),
 });
 
-export const conceptScaffoldSchema = z.object({
-  objective: z.string(),
+/**
+ * Open-concept path: one Groq call both DERIVES the claims (from the learner's own
+ * explanation, not the topic name) and EVALUATES each against that explanation. One
+ * call → one validated unit: this single schema covers both arrays, so neither can
+ * slip through half-checked. Zod guards the shape of each array; the reducer's
+ * substring gate guards the quotes; and `decomposeAndEvaluate` adds a semantic check
+ * that the two arrays line up one-to-one on claim id (shape validity ≠ referential
+ * integrity — that relationship is the one thing this schema alone cannot prove).
+ */
+export const conceptDebriefSchema = z.object({
   claims: z.array(
     z.object({
       id: z.string(),
@@ -59,4 +67,5 @@ export const conceptScaffoldSchema = z.object({
       commonMisconception: z.union([z.string(), z.null()]),
     }),
   ),
+  evaluations: z.array(claimEvaluationSchema),
 });

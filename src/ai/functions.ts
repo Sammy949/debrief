@@ -8,9 +8,9 @@
  * SERVER-ONLY (imports the Groq client, which reads GROQ_API_KEY).
  */
 
-import { callGroqStructured, type GroqModel } from "./groq";
+import { callGroqStructured, GroqError, type GroqModel } from "./groq";
 import {
-  conceptScaffoldSchema,
+  conceptDebriefSchema,
   curiousQuestionSchema,
   explanationEvaluationSchema,
   focusEvaluationSchema,
@@ -23,7 +23,7 @@ import type { ExplanationEvaluation, FocusEvaluation, Lesson, LessonClaim } from
 export type CuriousQuestion = z.infer<typeof curiousQuestionSchema>;
 export type TeachingIntervention = z.infer<typeof teachingInterventionSchema>;
 export type RepairQuestion = z.infer<typeof repairQuestionSchema>;
-export type ConceptScaffold = z.infer<typeof conceptScaffoldSchema>;
+export type ConceptDebrief = z.infer<typeof conceptDebriefSchema>;
 
 const FLAGSHIP: GroqModel = "openai/gpt-oss-120b"; // reliability-critical: evaluate + scaffold
 const FAST: GroqModel = "openai/gpt-oss-20b"; //  generative: question / intervention / repair
@@ -92,12 +92,11 @@ const REPAIR_REQUEST_SCHEMA = {
   },
 } as const;
 
-const SCAFFOLD_REQUEST_SCHEMA = {
+const CONCEPT_DEBRIEF_REQUEST_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["objective", "claims"],
+  required: ["claims", "evaluations"],
   properties: {
-    objective: { type: "string" },
     claims: {
       type: "array",
       items: {
@@ -111,6 +110,20 @@ const SCAFFOLD_REQUEST_SCHEMA = {
           whyItMatters: { type: "string" },
           teachingNote: { type: "string" },
           commonMisconception: { type: ["string", "null"] },
+        },
+      },
+    },
+    evaluations: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["sourceClaimId", "state", "evidenceQuote", "rationale"],
+        properties: {
+          sourceClaimId: { type: "string" },
+          state: { type: "string", enum: CLAIM_STATE_ENUM },
+          evidenceQuote: { type: ["string", "null"] },
+          rationale: { type: "string" },
         },
       },
     },
@@ -160,20 +173,76 @@ export async function evaluateExplanation(
   return explanationEvaluationSchema.parse(raw);
 }
 
-// --- 2. generateCuriousQuestion (fast) ------------------------------------
-export async function generateCuriousQuestion(
+// --- 2. probe questions (fast) — one generator per FocusKind --------------
+// All three return the same { question } shape; the reducer's focusKind picks which
+// fires. They differ only in intent, because probing a wrong answer, inviting the
+// learner into an untouched gap, and stress-testing a solid answer are three
+// different conversations.
+
+/** `weakness`: the claim was wrong or vague — probe the weakest point of what they said. */
+export async function generateWeaknessQuestion(
   lesson: Lesson,
   focusClaim: LessonClaim,
   learnerText: string,
 ): Promise<CuriousQuestion> {
   const system = [
     "You are a curious, patient reviewer in a teach-back tool.",
-    "Ask ONE short, naive follow-up question that probes the given claim at the weakest point of the learner's answer.",
-    "It must be answerable in a sentence or two, must NOT reveal the answer, and should push the learner to apply the idea when the situation changes.",
-    "Return only the question.",
+    "The learner's account of this claim is weak or partly off. Ask ONE short, naive follow-up question that probes exactly the weakest point of what they said.",
+    "It must be answerable in a sentence or two and must NOT reveal the answer. Return only the question.",
   ].join("\n");
 
   const user = `Concept: ${lesson.title}\nClaim to probe: ${focusClaim.claim}\nWhy it matters: ${focusClaim.whyItMatters}\n\nWhat the learner said:\n"""${learnerText}"""`;
+
+  const raw = await callGroqStructured({
+    model: FAST,
+    system,
+    user,
+    schemaName: "curious_question",
+    jsonSchema: asSchema(CURIOUS_REQUEST_SCHEMA),
+    temperature: 0.4,
+    maxTokens: 200,
+  });
+  return curiousQuestionSchema.parse(raw);
+}
+
+/** `unaddressed`: the learner never touched this part — invite them into it. */
+export async function generateUnaddressedQuestion(
+  lesson: Lesson,
+  focusClaim: LessonClaim,
+): Promise<CuriousQuestion> {
+  const system = [
+    "You are a warm, direct reviewer in a teach-back tool.",
+    "The learner has NOT yet addressed one part of this concept. Ask ONE friendly, direct question inviting them to explain that specific part in their own words.",
+    "Do NOT imply they already claimed anything about it. Do NOT ask a hypothetical 'what if' question. Name the actual gap. One or two sentences. Return only the question.",
+  ].join("\n");
+
+  const user = `Concept: ${lesson.title}\nThe part they haven't covered yet: ${focusClaim.claim}\nWhy it matters: ${focusClaim.whyItMatters}`;
+
+  const raw = await callGroqStructured({
+    model: FAST,
+    system,
+    user,
+    schemaName: "curious_question",
+    jsonSchema: asSchema(CURIOUS_REQUEST_SCHEMA),
+    temperature: 0.4,
+    maxTokens: 200,
+  });
+  return curiousQuestionSchema.parse(raw);
+}
+
+/** `verification`: every claim was solid — a transfer check in a new situation. */
+export async function generateVerificationQuestion(
+  lesson: Lesson,
+  focusClaim: LessonClaim,
+  learnerText: string,
+): Promise<CuriousQuestion> {
+  const system = [
+    "You are a curious reviewer in a teach-back tool. The learner explained every essential claim solidly, so this is a transfer check, not a correction.",
+    "Ask ONE short question that makes them APPLY the idea in a new, concrete situation to confirm the understanding holds.",
+    "It must be answerable in a sentence or two, must NOT restate a definition, and must NOT reveal the answer. Return only the question.",
+  ].join("\n");
+
+  const user = `Concept: ${lesson.title}\nClaim to stress-test: ${focusClaim.claim}\nWhy it matters: ${focusClaim.whyItMatters}\n\nWhat the learner said:\n"""${learnerText}"""`;
 
   const raw = await callGroqStructured({
     model: FAST,
@@ -275,21 +344,53 @@ export async function generateRepairQuestion(
   return repairQuestionSchema.parse(raw);
 }
 
-// --- 6. buildConceptScaffold (flagship, open-concept path) ----------------
-export async function buildConceptScaffold(concept: string): Promise<ConceptScaffold> {
+// --- 6. decomposeAndEvaluate (flagship, open-concept path) ----------------
+// ONE call that maps the learner's OWN explanation into claims AND judges each
+// against it. The claims trace back to what the learner actually said, not a
+// textbook syllabus imposed on the topic name before they wrote a word.
+export async function decomposeAndEvaluate(
+  concept: string,
+  explanation: string,
+): Promise<ConceptDebrief> {
   const system = [
-    "You build a compact concept scaffold for a teach-back learning tool.",
-    "Return an objective (one sentence naming what the learner should be able to explain) and 3 to 5 essential claims: the load-bearing ideas, not trivia.",
-    "Each claim: id (kebab-case slug), shortLabel (a 2 to 4 word label for a diagram), claim (one clear sentence), whyItMatters (one sentence), teachingNote (a one-sentence correction of the likely misunderstanding), commonMisconception (a common wrong belief, or null).",
+    "You map a learner's explanation into its essential claims AND judge each one, in a single pass, for a teach-back learning tool. You are not authoring a textbook curriculum.",
+    "CLAIMS: From the topic and the learner's OWN explanation, identify 3 to 5 claims that a complete, correct version of THIS explanation would need to make. Base them on the framing and vocabulary the learner actually used — each claim should trace back to something they said or gestured at — not on a standard textbook breakdown of the topic. Add a claim the learner omitted ONLY if it is genuinely essential to correctness (not merely a deeper detail).",
+    "For each claim: id (exactly 'c1','c2',… in order), shortLabel (2 to 4 words for a diagram), claim (one clear sentence), whyItMatters (one sentence), teachingNote (a one-sentence correction of the likely misunderstanding), commonMisconception (a common wrong belief, or null).",
+    "EVALUATION: Then judge EACH claim from the explanation ALONE, returning exactly one evaluation per claim whose sourceClaimId is that claim's id:",
+    "- solid: clearly and correctly explained.",
+    "- unclear: mentioned but vague or partial, not specifically wrong.",
+    "- needs_attention: the explanation says something that CONTRADICTS the claim (a real misconception).",
+    "- untested: not addressed at all.",
+    "Quote rule: for needs_attention ONLY, set evidenceQuote to the EXACT sentence copied verbatim from the explanation. For solid, unclear, and untested, evidenceQuote MUST be null. Never invent quotes. Keep each rationale to one sentence.",
   ].join("\n");
+
+  const user = `Topic: ${concept}\n\nLearner's explanation:\n"""${explanation}"""`;
 
   const raw = await callGroqStructured({
     model: FLAGSHIP,
     system,
-    user: `Concept: ${concept}`,
-    schemaName: "concept_scaffold",
-    jsonSchema: asSchema(SCAFFOLD_REQUEST_SCHEMA),
-    temperature: 0.3,
+    user,
+    schemaName: "concept_debrief",
+    jsonSchema: asSchema(CONCEPT_DEBRIEF_REQUEST_SCHEMA),
+    temperature: 0.2,
+    maxTokens: 2000,
   });
-  return conceptScaffoldSchema.parse(raw);
+  const parsed = conceptDebriefSchema.parse(raw);
+
+  // Semantic gate the schema cannot express: the two arrays must line up
+  // one-to-one on claim id, or the reducer would seed claims that no evaluation
+  // reaches (silently left untested). One validated unit, in and out — never
+  // claims-checked-but-evaluations-adrift.
+  const ids = parsed.claims.map((c) => c.id);
+  const idSet = new Set(ids);
+  const evalIds = parsed.evaluations.map((e) => e.sourceClaimId);
+  const oneToOne =
+    idSet.size === ids.length && // no duplicate claim ids
+    evalIds.length === ids.length &&
+    new Set(evalIds).size === evalIds.length && // no duplicate evaluations
+    evalIds.every((id) => idSet.has(id)); // every evaluation targets a real claim
+  if (!oneToOne) {
+    throw new GroqError("Concept debrief claims and evaluations do not line up one-to-one");
+  }
+  return parsed;
 }

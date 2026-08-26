@@ -13,6 +13,7 @@ import type { Claim, ClaimEvaluation, ExplanationEvaluation, FocusEvaluation, Le
 const lesson: Lesson = {
   slug: "closures",
   title: "Closures",
+  mode: "authored",
   objective: "Explain what a closure retains.",
   difficulty: "foundations",
   claims: [
@@ -24,7 +25,9 @@ const lesson: Lesson = {
   counterexample: "x",
   applicationScenarios: ["x"],
   misconceptions: ["x"],
-  fallbackCuriousQuestion: "x",
+  fallbackWeaknessQuestion: "x",
+  fallbackUnaddressedQuestion: "x",
+  fallbackVerificationQuestion: "x",
   fallbackRepairQuestion: "x",
 };
 
@@ -128,7 +131,7 @@ describe("the loop", () => {
     let s = createInitialState(lesson);
     s = reduce(s, { type: "SUBMIT_EXPLANATION", text: "partial explanation", evaluation: expl([solid("c1"), solid("c2"), untested("c3")]) });
     expect(s.focusClaimId).toBe("c3");
-    expect(s.focusKind).toBe("weakness");
+    expect(s.focusKind).toBe("unaddressed");
     expect(s.claims.find((c) => c.id === "c3")!.evidenceQuote).toBeNull();
   });
 

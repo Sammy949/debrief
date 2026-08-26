@@ -57,8 +57,11 @@ function TwoPane({ left, map }: { left: ReactNode; map: ReactNode }) {
   );
 }
 
-export function DebriefRunner({ lesson }: { lesson: Lesson }) {
-  const [state, setState] = useState<SessionState>(() => createInitialState(lesson));
+export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
+  // Lesson lives in state because the open path enriches it (claims decomposed from
+  // the explanation) on the first turn; authored lessons simply never change it.
+  const [lesson, setLesson] = useState<Lesson>(initialLesson);
+  const [state, setState] = useState<SessionState>(() => createInitialState(initialLesson));
   const [content, setContent] = useState<TurnContent>({});
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +71,7 @@ export function DebriefRunner({ lesson }: { lesson: Lesson }) {
     setError(null);
     try {
       const result = await action();
+      if (result.lesson) setLesson(result.lesson);
       setState(result.state);
       setContent(result.content);
       if (result.error) setError(result.error);
@@ -79,7 +83,8 @@ export function DebriefRunner({ lesson }: { lesson: Lesson }) {
   }
 
   function restart() {
-    setState(createInitialState(lesson));
+    setLesson(initialLesson);
+    setState(createInitialState(initialLesson));
     setContent({});
     setError(null);
   }
@@ -131,11 +136,18 @@ export function DebriefRunner({ lesson }: { lesson: Lesson }) {
   let left: ReactNode;
 
   if (state.stage === "probe") {
+    // Secondary safety net only — the action already resolves a per-kind fallback.
+    const probeFallback =
+      state.focusKind === "unaddressed"
+        ? lesson.fallbackUnaddressedQuestion
+        : state.focusKind === "verification"
+          ? lesson.fallbackVerificationQuestion
+          : lesson.fallbackWeaknessQuestion;
     left = (
       <>
         <Eyebrow>a curious question</Eyebrow>
         <p className="mt-2 mb-5 text-lg font-medium leading-relaxed text-ink">
-          {content.curiousQuestion ?? lesson.fallbackCuriousQuestion}
+          {content.curiousQuestion ?? probeFallback}
         </p>
         {inputArea("Considering your answer…", "Answer", (text) =>
           runTurn(() => answerCurious(lesson, state, text)),

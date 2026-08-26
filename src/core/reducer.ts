@@ -117,8 +117,13 @@ export function selectFocusClaim(claims: Claim[]): { claimId: string; kind: Focu
       WEAKNESS_PRIORITY[a.state] - WEAKNESS_PRIORITY[b.state] || a.focusOrder - b.focusOrder,
   );
 
-  // All solid → nothing to repair; the probe becomes a transfer check.
-  return { claimId: top.id, kind: top.state === "solid" ? "verification" : "weakness" };
+  // "Never mentioned" and "verified solid" are opposite signals, not neighbours.
+  // Priority ordering guarantees: `solid` here means every claim is solid (transfer
+  // check); `untested` here means nothing weaker exists, so it is a genuine gap to
+  // invite the learner into — never a stress-test of an answer they never gave.
+  const kind: FocusKind =
+    top.state === "solid" ? "verification" : top.state === "untested" ? "unaddressed" : "weakness";
+  return { claimId: top.id, kind };
 }
 
 // ---------------------------------------------------------------------------

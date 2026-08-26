@@ -1,16 +1,17 @@
 "use server";
 
 import {
-  buildConceptScaffold,
+  decomposeAndEvaluate,
   evaluateExplanation,
   evaluateFocusAnswer,
-  generateCuriousQuestion,
   generateRepairQuestion,
   generateTeachingIntervention,
-  type ConceptScaffold,
+  generateUnaddressedQuestion,
+  generateVerificationQuestion,
+  generateWeaknessQuestion,
   type TeachingIntervention,
 } from "@/ai/functions";
-import { reduce } from "@/core/reducer";
+import { createInitialState, reduce } from "@/core/reducer";
 import type { ExplanationEvaluation, FocusEvaluation, Lesson, LessonClaim, SessionState } from "@/core/types";
 import type { TurnContent, TurnResult } from "./turn-types";
 
@@ -29,14 +30,33 @@ function focusClaimOf(lesson: Lesson, state: SessionState): LessonClaim | undefi
   return state.focusClaimId ? lesson.claims.find((c) => c.id === state.focusClaimId) : undefined;
 }
 
+/**
+ * The one probe, generated to match its FocusKind. Each kind has its own prompt
+ * and its own authored fallback, so a Groq timeout still lands the learner in the
+ * right conversation (a gap invitation never degrades into a weakness probe).
+ */
 async function curiousContent(lesson: Lesson, state: SessionState, learnerText: string): Promise<TurnContent> {
   const focusClaim = focusClaimOf(lesson, state);
-  if (!focusClaim) return { curiousQuestion: lesson.fallbackCuriousQuestion };
+  const kind = state.focusKind;
+  if (!focusClaim || !kind) return { curiousQuestion: lesson.fallbackWeaknessQuestion };
+
+  const fallback =
+    kind === "unaddressed"
+      ? lesson.fallbackUnaddressedQuestion
+      : kind === "verification"
+        ? lesson.fallbackVerificationQuestion
+        : lesson.fallbackWeaknessQuestion;
+
   try {
-    const { question } = await generateCuriousQuestion(lesson, focusClaim, learnerText);
+    const { question } =
+      kind === "unaddressed"
+        ? await generateUnaddressedQuestion(lesson, focusClaim)
+        : kind === "verification"
+          ? await generateVerificationQuestion(lesson, focusClaim, learnerText)
+          : await generateWeaknessQuestion(lesson, focusClaim, learnerText);
     return { curiousQuestion: question };
   } catch {
-    return { curiousQuestion: lesson.fallbackCuriousQuestion };
+    return { curiousQuestion: fallback };
   }
 }
 
@@ -72,45 +92,72 @@ function slugify(s: string): string {
   );
 }
 
-/** Turn a generated scaffold into a full Lesson the loop can run. */
-function lessonFromScaffold(concept: string, scaffold: ConceptScaffold): Lesson {
+/**
+ * The shell an open debrief starts from: a title and objective, but NO claims.
+ * Claims are decomposed from the learner's own explanation at submit time (see
+ * `submitOpenExplanation`), so nothing here imposes a curriculum in advance —
+ * and entry needs no Groq call, so the explanation screen appears instantly.
+ */
+function openLessonShell(concept: string): Lesson {
+  const title = concept.trim();
   return {
-    slug: slugify(concept),
-    title: concept.trim(),
-    objective: scaffold.objective,
+    slug: slugify(title),
+    title,
+    objective: `Explain ${title} clearly enough that its essential ideas hold up under one good question.`,
     difficulty: "intermediate",
-    claims: scaffold.claims.map((c) => ({
-      id: c.id,
-      claim: c.claim,
-      shortLabel: c.shortLabel,
-      whyItMatters: c.whyItMatters,
-      teachingNote: c.teachingNote,
-      commonMisconception: c.commonMisconception,
-    })),
+    mode: "open",
+    claims: [],
     workedExample: "",
     counterexample: "",
     applicationScenarios: [],
-    misconceptions: scaffold.claims
-      .map((c) => c.commonMisconception)
-      .filter((m): m is string => Boolean(m)),
-    fallbackCuriousQuestion: "If the situation changed, would your explanation still hold, and why?",
+    misconceptions: [],
+    fallbackWeaknessQuestion: "If the situation changed, would your explanation still hold, and why?",
+    fallbackUnaddressedQuestion: "Can you walk me through the part of this you didn't get to yet?",
+    fallbackVerificationQuestion: "Use this idea in a new, concrete situation and show what happens.",
     fallbackRepairQuestion: "Use this idea in a new, concrete example and walk through what happens.",
   };
 }
 
-/** Open-concept entry: scaffold a concept and build a runnable Lesson from it. */
+/** Open-concept entry: build a runnable shell to write against. No claims yet. */
 export async function startOpenDebrief(
   concept: string,
 ): Promise<{ lesson: Lesson } | { error: string }> {
   const trimmed = concept.trim();
   if (!trimmed) return { error: "Enter a concept to debrief." };
+  return { lesson: openLessonShell(trimmed) };
+}
+
+/**
+ * Open path: decompose the learner's explanation into claims AND evaluate them in
+ * one call, build the now-populated Lesson, then run the SAME reducer transition
+ * the authored path uses. The enriched lesson rides back on the result so the
+ * client can carry its claims (teaching notes, labels) through the rest of the loop.
+ */
+async function submitOpenExplanation(lesson: Lesson, text: string): Promise<TurnResult> {
+  const shell = createInitialState(lesson);
+  let debrief;
   try {
-    const scaffold = await buildConceptScaffold(trimmed);
-    if (scaffold.claims.length === 0) return { error: "Couldn't map that concept. Try another one." };
-    return { lesson: lessonFromScaffold(trimmed, scaffold) };
+    debrief = await decomposeAndEvaluate(lesson.title, text);
   } catch {
-    return { error: "Couldn't build that debrief just now. Try again." };
+    return { state: shell, content: {}, error: "We couldn't map that explanation just now. Try submitting again." };
   }
+
+  const claims: LessonClaim[] = debrief.claims.map((c) => ({
+    id: c.id,
+    claim: c.claim,
+    shortLabel: c.shortLabel,
+    whyItMatters: c.whyItMatters,
+    teachingNote: c.teachingNote,
+    commonMisconception: c.commonMisconception,
+  }));
+  const enriched: Lesson = { ...lesson, claims };
+
+  const next = reduce(createInitialState(enriched), {
+    type: "SUBMIT_EXPLANATION",
+    text,
+    evaluation: { evaluations: debrief.evaluations },
+  });
+  return { state: next, content: await curiousContent(enriched, next, text), lesson: enriched };
 }
 
 export async function submitExplanation(
@@ -118,6 +165,9 @@ export async function submitExplanation(
   state: SessionState,
   text: string,
 ): Promise<TurnResult> {
+  // Open concept: claims don't exist yet — derive them from this explanation.
+  if (lesson.mode === "open") return submitOpenExplanation(lesson, text);
+
   let evaluation: ExplanationEvaluation;
   try {
     evaluation = await evaluateExplanation(lesson, text);

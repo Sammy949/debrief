@@ -8,6 +8,7 @@ import type { Lesson } from "./types";
 export const CLOSURES_LESSON: Lesson = {
   slug: "javascript-closures",
   title: "Closures",
+  mode: "authored",
   objective:
     "Explain what a closure retains, when that access is used, and how changing the surrounding variable affects the result.",
   difficulty: "foundations",
@@ -46,8 +47,12 @@ export const CLOSURES_LESSON: Lesson = {
     "You build a counter with a closure. After three calls, what does it return, and why?",
   ],
   misconceptions: ["Closures copy values at creation.", "All closures share one environment."],
-  fallbackCuriousQuestion:
+  fallbackWeaknessQuestion:
     "If the outer variable changes after the function is created but before it runs, what does the function see?",
+  fallbackUnaddressedQuestion:
+    "Can you explain the part of how closures work that you didn't get to yet?",
+  fallbackVerificationQuestion:
+    "In a loop that creates several closures over the same variable, what does each one see when it later runs, and why?",
   fallbackRepairQuestion:
     "Write a function that returns another function which reads a variable that later changes. What does calling it print, and why?",
 };

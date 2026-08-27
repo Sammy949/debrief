@@ -26,7 +26,7 @@ export type ClaimState = (typeof CLAIM_STATES)[number];
  * choose to CONTINUE (probe the next weakest claim) or WRAP_UP (settle). The
  * reducer owns every transition.
  */
-export const STAGES = ["explanation", "probe", "teaching", "checkpoint", "summary"] as const;
+export const STAGES = ["explanation", "select_focus", "probe", "teaching", "checkpoint", "summary"] as const;
 export type Stage = (typeof STAGES)[number];
 
 /** When a claim was (re)evaluated — labels the summary's before/after trail. */
@@ -178,6 +178,8 @@ export type DebriefEvent =
   | { type: "SUBMIT_EXPLANATION"; text: string; evaluation: ExplanationEvaluation }
   | { type: "ANSWER_CURIOUS"; text: string; evaluation: FocusEvaluation }
   | { type: "ANSWER_REPAIR"; text: string; evaluation: FocusEvaluation }
+  /** Learner points at the gap to dig into first, from the mapped claims. */
+  | { type: "SET_FOCUS"; claimId: string }
   /** Learner choices at a checkpoint — no AI judgment, pure navigation. */
   | { type: "CONTINUE" }
   | { type: "WRAP_UP" };

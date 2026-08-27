@@ -96,21 +96,40 @@ describe("the loop", () => {
     expect(s.verdict).toBe("solid_understanding");
   });
 
-  it("probe holds but the map is incomplete → checkpoint, then wrap up → gap_to_revisit", () => {
+  it("2+ gaps pause at select_focus; the learner picks, then the loop runs", () => {
     let s = createInitialState(lesson);
     s = reduce(s, { type: "SUBMIT_EXPLANATION", text: "the explanation", evaluation: expl([solid("c1"), attention("c2", "the explanation"), unclear("c3")]) });
+    expect(s.stage).toBe("select_focus");
+    expect(s.focusClaimId).toBeNull();
+    // a probe answer is ignored until a focus is chosen
+    expect(reduce(s, { type: "ANSWER_CURIOUS", text: "x", evaluation: fSolid })).toBe(s);
+    s = reduce(s, { type: "SET_FOCUS", claimId: "c2" });
+    expect(s.stage).toBe("probe");
     expect(s.focusClaimId).toBe("c2");
+    expect(s.focusKind).toBe("weakness");
     s = reduce(s, { type: "ANSWER_CURIOUS", text: "clarified", evaluation: fSolid });
-    // c2 is solid now, but c3 is still unclear → the session pauses, it doesn't end.
-    expect(s.stage).toBe("checkpoint");
+    expect(s.stage).toBe("checkpoint"); // c3 still unclear
     s = reduce(s, { type: "WRAP_UP" });
     expect(s.stage).toBe("summary");
-    expect(s.verdict).toBe("gap_to_revisit"); // c3 still unclear
+    expect(s.verdict).toBe("gap_to_revisit");
+  });
+
+  it("set focus only works from select_focus, and only for a real claim", () => {
+    const s = createInitialState(lesson);
+    expect(reduce(s, { type: "SET_FOCUS", claimId: "c1" })).toBe(s); // wrong stage
+    const picking = reduce(s, {
+      type: "SUBMIT_EXPLANATION",
+      text: "the explanation",
+      evaluation: expl([solid("c1"), attention("c2", "the explanation"), unclear("c3")]),
+    });
+    expect(picking.stage).toBe("select_focus");
+    expect(reduce(picking, { type: "SET_FOCUS", claimId: "nope" })).toBe(picking); // unknown claim
   });
 
   it("keep going advances to the next weakest claim and re-probes", () => {
     let s = createInitialState(lesson);
     s = reduce(s, { type: "SUBMIT_EXPLANATION", text: "the explanation", evaluation: expl([solid("c1"), attention("c2", "the explanation"), unclear("c3")]) });
+    s = reduce(s, { type: "SET_FOCUS", claimId: "c2" });
     s = reduce(s, { type: "ANSWER_CURIOUS", text: "clarified", evaluation: fSolid });
     expect(s.stage).toBe("checkpoint");
     s = reduce(s, { type: "CONTINUE" });

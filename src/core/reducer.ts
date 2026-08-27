@@ -119,13 +119,16 @@ export function selectFocusClaim(claims: Claim[]): { claimId: string; kind: Focu
       WEAKNESS_PRIORITY[a.state] - WEAKNESS_PRIORITY[b.state] || a.focusOrder - b.focusOrder,
   );
 
-  // "Never mentioned" and "verified solid" are opposite signals, not neighbours.
-  // Priority ordering guarantees: `solid` here means every claim is solid (transfer
-  // check); `untested` here means nothing weaker exists, so it is a genuine gap to
-  // invite the learner into — never a stress-test of an answer they never gave.
-  const kind: FocusKind =
-    top.state === "solid" ? "verification" : top.state === "untested" ? "unaddressed" : "weakness";
-  return { claimId: top.id, kind };
+  return { claimId: top.id, kind: focusKindFor(top.state) };
+}
+
+/**
+ * The probe's kind follows the claim's state. "Never mentioned" and "verified
+ * solid" are opposite signals: an untested claim is a gap to INVITE into, a solid
+ * one is a transfer check — they must never share a kind.
+ */
+export function focusKindFor(state: ClaimState): FocusKind {
+  return state === "solid" ? "verification" : state === "untested" ? "unaddressed" : "weakness";
 }
 
 // ---------------------------------------------------------------------------
@@ -223,21 +226,43 @@ export function reduce(state: SessionState, event: DebriefEvent): SessionState {
         };
       });
 
-      const focus = selectFocusClaim(claims);
       const trajectory = [
         ...state.trajectory,
         ...claims.map((c) => snapshotFocus(c, "explanation")),
       ];
-
-      return {
+      const base = {
         ...state,
         claims,
-        focusClaimId: focus?.claimId ?? null,
-        focusKind: focus?.kind ?? null,
-        stage: "probe",
         turnCount: state.turnCount + 1,
         trajectory,
         explanationText: event.text,
+      };
+
+      // 2+ gaps: let the learner point at where to dig in first. 0-1: nothing to
+      // choose between, so auto-focus straight to the probe (unchanged behavior).
+      const open = claims.filter((c) => c.state !== "solid");
+      if (open.length >= 2) {
+        return { ...base, stage: "select_focus", focusClaimId: null, focusKind: null };
+      }
+      const focus = selectFocusClaim(claims);
+      return {
+        ...base,
+        stage: "probe",
+        focusClaimId: focus?.claimId ?? null,
+        focusKind: focus?.kind ?? null,
+      };
+    }
+
+    // Learner picked the gap to work first (from the select_focus questionnaire).
+    case "SET_FOCUS": {
+      if (state.stage !== "select_focus") return state;
+      const claim = state.claims.find((c) => c.id === event.claimId);
+      if (!claim) return state;
+      return {
+        ...state,
+        stage: "probe",
+        focusClaimId: claim.id,
+        focusKind: focusKindFor(claim.state),
       };
     }
 

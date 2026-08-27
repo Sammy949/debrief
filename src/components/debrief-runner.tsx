@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Plus } from "@phosphor-icons/react/dist/ssr";
-import { answerCurious, answerRepair, continueDebrief, submitExplanation, wrapUp } from "@/app/debrief/actions";
+import { answerCurious, answerRepair, continueDebrief, selectFocus, submitExplanation, wrapUp } from "@/app/debrief/actions";
 import type { TurnContent, TurnResult } from "@/app/debrief/turn-types";
+import { FocusSelect } from "@/components/focus-select";
 import { ResponseField } from "@/components/response-field";
 import { Thinking } from "@/components/thinking";
 import { UnderstandingMap } from "@/components/understanding-map";
@@ -221,7 +222,19 @@ export function DebriefRunner({
 
   let left: ReactNode;
 
-  if (state.stage === "probe") {
+  if (state.stage === "select_focus") {
+    const open = state.claims.filter((c) => c.state !== "solid");
+    left = pending ? (
+      <Thinking label="Lining up that probe…" />
+    ) : (
+      <>
+        <Eyebrow>where do you want to dig in?</Eyebrow>
+        <div className="mt-4">
+          <FocusSelect claims={open} onPick={(id) => runTurn(() => selectFocus(lesson, state, id))} />
+        </div>
+      </>
+    );
+  } else if (state.stage === "probe") {
     // Secondary safety net only; the action already resolves a per-kind fallback.
     const probeFallback =
       state.focusKind === "unaddressed"

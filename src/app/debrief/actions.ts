@@ -242,3 +242,18 @@ export async function continueDebrief(lesson: Lesson, state: SessionState): Prom
 export async function wrapUp(state: SessionState): Promise<TurnResult> {
   return { state: reduce(state, { type: "WRAP_UP" }), content: {} };
 }
+
+/**
+ * select_focus → the learner picked which mapped gap to work first. Set it as the
+ * focus and generate that probe against their original explanation. No new judgment
+ * — the gaps were already found by decomposeAndEvaluate.
+ */
+export async function selectFocus(
+  lesson: Lesson,
+  state: SessionState,
+  claimId: string,
+): Promise<TurnResult> {
+  const next = reduce(state, { type: "SET_FOCUS", claimId });
+  if (next.stage !== "probe") return { state: next, content: {} };
+  return { state: next, content: await curiousContent(lesson, next, next.explanationText) };
+}

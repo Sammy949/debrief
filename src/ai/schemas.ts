@@ -69,3 +69,46 @@ export const conceptDebriefSchema = z.object({
   ),
   evaluations: z.array(claimEvaluationSchema),
 });
+
+/**
+ * LENIENT response schemas. Groq's strict structured output guarantees the JSON
+ * SHAPE, but not the conditional quote invariant (only `needs_attention` carries
+ * a quote) — the model routinely attaches a quote to a `solid` claim or omits a
+ * rationale. The strict discriminated-union schemas above would REJECT that
+ * otherwise-usable output and fail the whole turn. So we parse leniently here and
+ * normalize to the strict domain type in code (see `functions.ts`), which is far
+ * more robust than throwing the learner back to the start over a stray quote.
+ */
+const anyState = z.enum(["solid", "unclear", "needs_attention", "untested"]);
+const looseQuote = z.union([z.string(), z.null()]).optional();
+
+export const rawClaimEvaluationSchema = z.object({
+  sourceClaimId: z.string(),
+  state: anyState,
+  evidenceQuote: looseQuote,
+  rationale: z.string().optional(),
+});
+
+export const rawExplanationEvaluationSchema = z.object({
+  evaluations: z.array(rawClaimEvaluationSchema),
+});
+
+export const rawFocusEvaluationSchema = z.object({
+  state: anyState,
+  evidenceQuote: looseQuote,
+  rationale: z.string().optional(),
+});
+
+export const rawConceptDebriefSchema = z.object({
+  claims: z.array(
+    z.object({
+      id: z.string(),
+      shortLabel: z.string(),
+      claim: z.string(),
+      whyItMatters: z.string().optional(),
+      teachingNote: z.string().optional(),
+      commonMisconception: looseQuote,
+    }),
+  ),
+  evaluations: z.array(rawClaimEvaluationSchema),
+});

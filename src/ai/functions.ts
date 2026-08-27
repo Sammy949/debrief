@@ -12,18 +12,52 @@ import { callGroqStructured, GroqError, type GroqModel } from "./groq";
 import {
   conceptDebriefSchema,
   curiousQuestionSchema,
-  explanationEvaluationSchema,
-  focusEvaluationSchema,
+  rawConceptDebriefSchema,
+  rawExplanationEvaluationSchema,
+  rawFocusEvaluationSchema,
   repairQuestionSchema,
   teachingInterventionSchema,
 } from "./schemas";
 import type { z } from "zod";
-import type { ExplanationEvaluation, FocusEvaluation, Lesson, LessonClaim } from "@/core/types";
+import type {
+  ClaimEvaluation,
+  ClaimState,
+  ExplanationEvaluation,
+  FocusEvaluation,
+  Lesson,
+  LessonClaim,
+} from "@/core/types";
 
 export type CuriousQuestion = z.infer<typeof curiousQuestionSchema>;
 export type TeachingIntervention = z.infer<typeof teachingInterventionSchema>;
 export type RepairQuestion = z.infer<typeof repairQuestionSchema>;
 export type ConceptDebrief = z.infer<typeof conceptDebriefSchema>;
+
+/** The quote invariant lives here, not in the schema: only a contradicted claim
+ *  keeps a break-point quote; every other state is forced to null. The reducer
+ *  then checks that quote against the learner's actual text. */
+function normalizeClaimEval(e: {
+  sourceClaimId: string;
+  state: ClaimState;
+  evidenceQuote?: string | null;
+  rationale?: string;
+}): ClaimEvaluation {
+  const rationale = e.rationale ?? "";
+  return e.state === "needs_attention"
+    ? { sourceClaimId: e.sourceClaimId, state: "needs_attention", evidenceQuote: e.evidenceQuote ?? "", rationale }
+    : { sourceClaimId: e.sourceClaimId, state: e.state, evidenceQuote: null, rationale };
+}
+
+function normalizeFocusEval(e: {
+  state: ClaimState;
+  evidenceQuote?: string | null;
+  rationale?: string;
+}): FocusEvaluation {
+  const rationale = e.rationale ?? "";
+  return e.state === "needs_attention"
+    ? { state: "needs_attention", evidenceQuote: e.evidenceQuote ?? "", rationale }
+    : { state: e.state, evidenceQuote: null, rationale };
+}
 
 const FLAGSHIP: GroqModel = "openai/gpt-oss-120b"; // reliability-critical: evaluate + scaffold
 const FAST: GroqModel = "openai/gpt-oss-20b"; //  generative: question / intervention / repair
@@ -170,7 +204,8 @@ export async function evaluateExplanation(
     jsonSchema: asSchema(EVAL_REQUEST_SCHEMA),
     temperature: 0.15,
   });
-  return explanationEvaluationSchema.parse(raw);
+  const parsed = rawExplanationEvaluationSchema.parse(raw);
+  return { evaluations: parsed.evaluations.map(normalizeClaimEval) };
 }
 
 // --- 2. probe questions (fast) — one generator per FocusKind --------------
@@ -284,7 +319,7 @@ export async function evaluateFocusAnswer(
     jsonSchema: asSchema(FOCUS_REQUEST_SCHEMA),
     temperature: 0.15,
   });
-  return focusEvaluationSchema.parse(raw);
+  return normalizeFocusEval(rawFocusEvaluationSchema.parse(raw));
 }
 
 // --- 4. generateTeachingIntervention (fast, anchored on the teaching note) -
@@ -375,31 +410,39 @@ export async function decomposeAndEvaluate(
     temperature: 0.2,
     maxTokens: 2000,
   });
-  const parsed = conceptDebriefSchema.parse(raw);
+  const parsed = rawConceptDebriefSchema.parse(raw);
 
-  // A thin or empty explanation can make the model return zero (or one) claims.
-  // The one-to-one gate below passes vacuously on empty arrays, which would
-  // silently advance the session into a probe with no focus claim (a dead end).
-  // Require a real decomposition; the caller turns this into a "add more detail"
-  // prompt rather than a broken loop.
-  if (parsed.claims.length < 2) {
-    throw new GroqError("Concept debrief returned too few claims to map an explanation");
-  }
-
-  // Semantic gate the schema cannot express: the two arrays must line up
-  // one-to-one on claim id, or the reducer would seed claims that no evaluation
-  // reaches (silently left untested). One validated unit, in and out — never
-  // claims-checked-but-evaluations-adrift.
   const ids = parsed.claims.map((c) => c.id);
   const idSet = new Set(ids);
-  const evalIds = parsed.evaluations.map((e) => e.sourceClaimId);
-  const oneToOne =
-    idSet.size === ids.length && // no duplicate claim ids
-    evalIds.length === ids.length &&
-    new Set(evalIds).size === evalIds.length && // no duplicate evaluations
-    evalIds.every((id) => idSet.has(id)); // every evaluation targets a real claim
-  if (!oneToOne) {
-    throw new GroqError("Concept debrief claims and evaluations do not line up one-to-one");
+
+  // A thin explanation can yield an empty or degenerate decomposition. Don't
+  // advance the loop into a focus-less probe: require a real map with distinct
+  // claim ids. The caller turns this into an "add a bit more detail" prompt.
+  if (parsed.claims.length < 2 || idSet.size !== ids.length) {
+    throw new GroqError(
+      `decomposeAndEvaluate: degenerate decomposition (${parsed.claims.length} claims, ${idSet.size} distinct)`,
+    );
   }
-  return parsed;
+
+  const claims = parsed.claims.map((c) => ({
+    id: c.id,
+    shortLabel: c.shortLabel,
+    claim: c.claim,
+    whyItMatters: c.whyItMatters ?? "",
+    teachingNote: c.teachingNote ?? "",
+    commonMisconception: c.commonMisconception ?? null,
+  }));
+
+  // Reconcile rather than reject: keep one evaluation per real claim id, drop the
+  // rest. A claim the model didn't evaluate simply stays `untested` in the reducer
+  // — a valid state, not a reason to fail the whole turn.
+  const seen = new Set<string>();
+  const evaluations: ClaimEvaluation[] = [];
+  for (const e of parsed.evaluations) {
+    if (!idSet.has(e.sourceClaimId) || seen.has(e.sourceClaimId)) continue;
+    seen.add(e.sourceClaimId);
+    evaluations.push(normalizeClaimEval(e));
+  }
+
+  return { claims, evaluations };
 }

@@ -123,7 +123,7 @@ export async function startOpenDebrief(
   concept: string,
 ): Promise<{ lesson: Lesson } | { error: string }> {
   const trimmed = concept.trim();
-  if (!trimmed) return { error: "Enter a concept to debrief." };
+  if (!trimmed) return { error: "Give me a concept to dig into first." };
   return { lesson: openLessonShell(trimmed) };
 }
 
@@ -138,12 +138,13 @@ async function submitOpenExplanation(lesson: Lesson, text: string): Promise<Turn
   let debrief;
   try {
     debrief = await decomposeAndEvaluate(lesson.title, text);
-  } catch {
+  } catch (err) {
+    console.error("[debrief] decomposeAndEvaluate failed:", err);
     return {
       state: shell,
       content: {},
       error:
-        "We couldn't map that explanation. Try adding a bit more detail — a sentence or two on how it works — then submit again.",
+        "Hmm, I couldn't quite map that one. Try adding a sentence or two on how it works, and give it another go.",
     };
   }
 
@@ -176,8 +177,9 @@ export async function submitExplanation(
   let evaluation: ExplanationEvaluation;
   try {
     evaluation = await evaluateExplanation(lesson, text);
-  } catch {
-    return { state, content: {}, error: "We couldn't read that explanation just now. Try submitting again." };
+  } catch (err) {
+    console.error("[debrief] evaluateExplanation failed:", err);
+    return { state, content: {}, error: "I had trouble reading that one. Mind sending it again?" };
   }
   const next = reduce(state, { type: "SUBMIT_EXPLANATION", text, evaluation });
   return { state: next, content: await curiousContent(lesson, next, text) };
@@ -189,13 +191,14 @@ export async function answerCurious(
   text: string,
 ): Promise<TurnResult> {
   const focusClaim = focusClaimOf(lesson, state);
-  if (!focusClaim) return { state, content: {}, error: "Lost the focus point — start over." };
+  if (!focusClaim) return { state, content: {}, error: "I lost the thread there — let's start over." };
 
   let evaluation: FocusEvaluation;
   try {
     evaluation = await evaluateFocusAnswer(lesson, focusClaim, text);
-  } catch {
-    return { state, content: {}, error: "We couldn't read that answer just now. Try again." };
+  } catch (err) {
+    console.error("[debrief] evaluateFocusAnswer (curious) failed:", err);
+    return { state, content: {}, error: "I had trouble reading that — try again?" };
   }
   const next = reduce(state, { type: "ANSWER_CURIOUS", text, evaluation });
   const content = next.stage === "teaching" ? await teachingContent(lesson, next) : {};
@@ -208,13 +211,14 @@ export async function answerRepair(
   text: string,
 ): Promise<TurnResult> {
   const focusClaim = focusClaimOf(lesson, state);
-  if (!focusClaim) return { state, content: {}, error: "Lost the focus point — start over." };
+  if (!focusClaim) return { state, content: {}, error: "I lost the thread there — let's start over." };
 
   let evaluation: FocusEvaluation;
   try {
     evaluation = await evaluateFocusAnswer(lesson, focusClaim, text);
-  } catch {
-    return { state, content: {}, error: "We couldn't read that answer just now. Try again." };
+  } catch (err) {
+    console.error("[debrief] evaluateFocusAnswer (repair) failed:", err);
+    return { state, content: {}, error: "I had trouble reading that — try again?" };
   }
   const next = reduce(state, { type: "ANSWER_REPAIR", text, evaluation });
   return { state: next, content: {} };

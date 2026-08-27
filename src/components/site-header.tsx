@@ -63,13 +63,14 @@ export function SiteHeader() {
           </Dialog.Trigger>
 
           <Dialog.Portal>
-            <Dialog.Backdrop className="fixed inset-0 z-50 bg-obsidian/80 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+            <Dialog.Backdrop className="fixed inset-0 z-50 bg-obsidian/80 backdrop-blur-md transition-[opacity,backdrop-filter] duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
             <Dialog.Popup className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col border-t border-line bg-surface transition-transform duration-300 ease-out data-[ending-style]:translate-y-full data-[starting-style]:translate-y-full">
               <div className="flex justify-center pt-3 pb-1">
                 <span className="h-1 w-10 bg-line-strong" aria-hidden="true" />
               </div>
               <div className="flex items-center justify-between px-6 py-3">
-                <Dialog.Title className="font-serif text-xl tracking-tight text-ivory">
+                <Dialog.Title className="flex items-center gap-2.5 font-serif text-xl tracking-tight text-ivory">
+                  <Brain weight="duotone" className="size-5 text-amber" aria-hidden="true" />
                   Debrief
                 </Dialog.Title>
                 <Dialog.Close

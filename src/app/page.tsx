@@ -1,20 +1,18 @@
 import Link from "next/link";
-import { Brain, MagnifyingGlass, ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { Brain, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
 const NAV = [
   { label: "Methodology", href: "#methodology", active: true },
   { label: "Library", href: "/lessons", active: false },
-  { label: "Pricing", href: "#pricing", active: false },
   { label: "About", href: "#about", active: false },
 ];
 
-const FOOTER_LINKS = [
-  "Documentation",
-  "Privacy Policy",
-  "Terms of Service",
-  "API Reference",
-  "Status",
-];
+/** The state of a stratum in the map-preview card. */
+const PREVIEW_STRATA = [
+  { label: "What an index is", state: "solid" },
+  { label: "Why lookups get faster", state: "needs_attention" },
+  { label: "The write-time cost", state: "untested" },
+] as const;
 
 export default function Home() {
   return (
@@ -43,36 +41,22 @@ export default function Home() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-4">
-            <form
-              action="/lessons"
-              className="hidden items-center gap-2 border border-line px-3 py-1.5 transition-colors focus-within:border-amber md:flex"
-            >
-              <MagnifyingGlass className="size-4 text-muted-ink" aria-hidden="true" />
-              <input
-                name="q"
-                placeholder="Search…"
-                aria-label="Search the library"
-                className="w-28 bg-transparent text-sm text-ivory placeholder:text-muted-ink focus:outline-none"
-              />
-            </form>
-            <Link
-              href="/debrief/new"
-              className="inline-flex items-center gap-2 bg-ivory px-4 py-2 font-mono text-[0.7rem] font-medium tracking-[0.14em] uppercase text-obsidian transition-colors hover:bg-amber"
-            >
-              Get Started
-              <ArrowRight weight="bold" className="size-3.5" />
-            </Link>
-          </div>
+          <Link
+            href="/debrief/new"
+            className="inline-flex items-center gap-2 bg-ivory px-4 py-2 font-mono text-[0.7rem] font-medium tracking-[0.14em] uppercase text-obsidian transition-colors hover:bg-amber"
+          >
+            Get Started
+            <ArrowRight weight="bold" className="size-3.5" />
+          </Link>
         </div>
       </header>
 
       <main className="flex flex-1 flex-col">
         {/* ---- hero: editorial split over a fading drafting grid ---- */}
         <section className="relative overflow-hidden border-b border-line bg-grid-pattern pt-28 pb-24 gradient-mask-b">
-          <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 md:grid-cols-12">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-12 gap-y-16 px-6 md:grid-cols-12">
             {/* left: the pitch */}
-            <div className="flex flex-col gap-8 md:col-span-7">
+            <div className="flex flex-col gap-8 md:col-span-6">
               <div className="inline-flex w-fit items-center gap-2.5 border border-line bg-surface-lowest px-3 py-1.5">
                 <span className="size-1.5 bg-amber" aria-hidden="true" />
                 <span className="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-ivory-dim">
@@ -86,10 +70,10 @@ export default function Home() {
                 visible.
               </h1>
 
-              <p className="max-w-xl text-lg leading-relaxed text-ivory-dim">
-                A strict, editorial environment for high-cognitive consolidation.
-                Articulate complex concepts, receive surgical feedback, and forge
-                robust mental models through the act of teaching.
+              <p className="max-w-md text-lg leading-relaxed text-ivory-dim">
+                Pick something you think you understand and explain it in your own
+                words. Debrief finds the exact point where your explanation breaks,
+                then helps you repair it.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -103,39 +87,14 @@ export default function Home() {
                   href="#methodology"
                   className="inline-flex items-center border border-line px-7 py-3 font-medium text-ivory transition-colors hover:bg-surface-high"
                 >
-                  Read the Manifesto
+                  How it works
                 </Link>
               </div>
             </div>
 
-            {/* right: the teach-back prompt, as a session log */}
-            <div className="relative flex items-center justify-center md:col-span-5">
-              <span
-                aria-hidden="true"
-                className="orbit-slow pointer-events-none absolute -right-16 -bottom-16 size-64 rounded-full border border-dashed border-line opacity-25"
-              />
-              <div className="relative z-10 w-full max-w-md rotate-2 border border-line bg-surface-lowest p-4 shadow-[0_18px_44px_-26px_rgba(0,0,0,0.9)] transition-transform duration-500 hover:rotate-0">
-                <div className="mb-3 flex items-center justify-between border-b border-line pb-2.5">
-                  <span className="font-mono text-xs text-muted-ink">session_042.log</span>
-                  <div className="flex gap-1.5" aria-hidden="true">
-                    <span className="size-1.5 bg-line-strong" />
-                    <span className="size-1.5 bg-line-strong" />
-                    <span className="size-1.5 bg-line-strong" />
-                  </div>
-                </div>
-                <p className="mb-4 font-serif text-xl leading-snug text-ivory">
-                  Explain &lsquo;Quantum Entanglement&rsquo; as if to a fellow
-                  physicist.
-                </p>
-                <div className="border border-line bg-surface p-3">
-                  <p className="font-mono text-xs leading-relaxed text-muted-ink">
-                    &gt; It&apos;s a physical phenomenon that occurs when a group
-                    of particles are generated, interact, or share spatial
-                    proximity…
-                  </p>
-                  <div className="mt-3 h-px w-full animate-pulse bg-amber opacity-60" />
-                </div>
-              </div>
+            {/* right: two layered artifacts — the prompt, and the map it produces */}
+            <div className="md:col-span-6">
+              <HeroArtifacts />
             </div>
           </div>
         </section>
@@ -143,26 +102,105 @@ export default function Home() {
 
       {/* ---- footer ---- */}
       <footer className="mt-auto border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-8 px-6 py-16 md:flex-row md:items-center">
-          <div className="flex flex-col gap-2">
+        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-8 px-6 py-14 md:flex-row md:items-end">
+          <div className="flex flex-col gap-3">
             <span className="font-serif text-2xl text-ivory">Debrief</span>
-            <span className="text-sm text-muted-ink">
-              © 2026 Debrief Technical Systems.
+            <span className="max-w-xs text-sm leading-relaxed text-muted-ink">
+              Don&apos;t just learn it. Debrief it.
             </span>
           </div>
-          <nav className="flex flex-wrap gap-x-6 gap-y-3">
-            {FOOTER_LINKS.map((label) => (
-              <a
-                key={label}
-                href="#"
-                className="text-sm text-muted-ink underline decoration-1 underline-offset-4 transition-colors hover:text-ivory"
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
+          <div className="flex flex-col gap-3 md:items-end">
+            <nav className="flex flex-wrap gap-x-6 gap-y-2">
+              <Link href="/lessons" className="text-sm text-muted-ink transition-colors hover:text-ivory">
+                Library
+              </Link>
+              <Link href="#methodology" className="text-sm text-muted-ink transition-colors hover:text-ivory">
+                Methodology
+              </Link>
+              <Link href="#about" className="text-sm text-muted-ink transition-colors hover:text-ivory">
+                About
+              </Link>
+            </nav>
+            <span className="font-mono text-[0.7rem] tracking-wide text-ghost">
+              © 2026 Debrief
+            </span>
+          </div>
         </div>
       </footer>
     </>
+  );
+}
+
+const STATE_TONE: Record<string, string> = {
+  solid: "text-ivory-dim",
+  needs_attention: "text-amber",
+  untested: "text-ghost",
+};
+const STATE_WORD: Record<string, string> = {
+  solid: "solid",
+  needs_attention: "needs attention",
+  untested: "not reached",
+};
+
+/** The two stacked cards: the teach-back prompt lying over the map it produces. */
+function HeroArtifacts() {
+  return (
+    <div className="relative mx-auto max-w-md pt-10 pb-16 md:pb-10">
+      {/* back card: the understanding map the session builds */}
+      <div className="ml-auto w-[82%] border border-line bg-surface-lowest p-5">
+        <div className="mb-4 flex items-center justify-between border-b border-line pb-2.5">
+          <span className="font-mono text-xs text-muted-ink">understanding.map</span>
+          <span className="size-1.5 bg-amber" aria-hidden="true" />
+        </div>
+        <p className="mb-5 font-serif text-lg leading-snug text-ivory">Database indexes</p>
+        <ul className="flex list-none flex-col gap-4 p-0">
+          {PREVIEW_STRATA.map((s) => (
+            <li key={s.label} className="flex flex-col gap-2">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-sm text-ivory-dim">{s.label}</span>
+                <span
+                  className={`shrink-0 font-mono text-[0.6rem] tracking-[0.12em] uppercase ${STATE_TONE[s.state]}`}
+                >
+                  {STATE_WORD[s.state]}
+                </span>
+              </div>
+              {s.state === "needs_attention" ? (
+                <span className="flex h-2 items-center" aria-hidden="true">
+                  <span className="beam-fracture h-[2px] w-2/5 -translate-y-[3px] bg-amber" />
+                  <span className="w-3" />
+                  <span className="beam-fracture h-[2px] w-2/5 translate-y-[3px] bg-amber" />
+                </span>
+              ) : s.state === "untested" ? (
+                <span className="w-2/3 border-t border-dotted border-ghost" aria-hidden="true" />
+              ) : (
+                <span className="h-[3px] w-full bg-ivory-dim" aria-hidden="true" />
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* front card: the teach-back prompt, offset to overlap the map below-left */}
+      <div className="relative -mt-16 mr-auto w-[86%] border border-line bg-surface p-5 shadow-[0_20px_50px_-28px_rgba(0,0,0,0.95)]">
+        <div className="mb-3 flex items-center justify-between border-b border-line pb-2.5">
+          <span className="font-mono text-xs text-muted-ink">session_042.log</span>
+          <div className="flex gap-1.5" aria-hidden="true">
+            <span className="size-1.5 bg-line-strong" />
+            <span className="size-1.5 bg-line-strong" />
+            <span className="size-1.5 bg-line-strong" />
+          </div>
+        </div>
+        <p className="mb-4 font-serif text-xl leading-snug text-ivory">
+          Explain how a database index makes a lookup faster.
+        </p>
+        <div className="border border-line bg-surface-lowest p-3">
+          <p className="font-mono text-xs leading-relaxed text-muted-ink">
+            &gt; It keeps a sorted copy of the column, so the database can jump
+            straight to the row instead of scanning every…
+          </p>
+          <div className="mt-3 h-px w-full animate-pulse bg-amber opacity-60" />
+        </div>
+      </div>
+    </div>
   );
 }

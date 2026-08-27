@@ -138,23 +138,6 @@
   animation: shimmer-sweep 2.4s linear infinite;
 }
 
-/* The signature beam: a warm scan descending the hairline through the strata. */
-@keyframes beam-descend {
-  0% { background-position: 0 -110%; }
-  100% { background-position: 0 210%; }
-}
-.beam-scan {
-  background-image: linear-gradient(
-    to bottom,
-    transparent 42%,
-    var(--amber) 50%,
-    transparent 58%
-  );
-  background-size: 100% 320%;
-  background-repeat: no-repeat;
-  animation: beam-descend 5s ease-in-out infinite;
-}
-
 /* The fracture: the amber break holds a slow pulse — the one live beat on the map. */
 @keyframes fracture-pulse {
   0%, 100% { opacity: 1; }
@@ -178,21 +161,8 @@
   mask-image: linear-gradient(to bottom, #000 42%, transparent 96%);
 }
 
-/* The teach-back card's decorative orbit — one slow, quiet rotation. */
-@keyframes orbit-slow {
-  to { transform: rotate(360deg); }
-}
-.orbit-slow {
-  animation: orbit-slow 60s linear infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .beam-scan {
-    animation: none;
-    background-image: none;
-  }
-  .beam-fracture,
-  .orbit-slow {
+  .beam-fracture {
     animation: none;
   }
   .shimmer {

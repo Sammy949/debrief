@@ -377,6 +377,15 @@ export async function decomposeAndEvaluate(
   });
   const parsed = conceptDebriefSchema.parse(raw);
 
+  // A thin or empty explanation can make the model return zero (or one) claims.
+  // The one-to-one gate below passes vacuously on empty arrays, which would
+  // silently advance the session into a probe with no focus claim (a dead end).
+  // Require a real decomposition; the caller turns this into a "add more detail"
+  // prompt rather than a broken loop.
+  if (parsed.claims.length < 2) {
+    throw new GroqError("Concept debrief returned too few claims to map an explanation");
+  }
+
   // Semantic gate the schema cannot express: the two arrays must line up
   // one-to-one on claim id, or the reducer would seed claims that no evaluation
   // reaches (silently left untested). One validated unit, in and out — never

@@ -139,7 +139,12 @@ async function submitOpenExplanation(lesson: Lesson, text: string): Promise<Turn
   try {
     debrief = await decomposeAndEvaluate(lesson.title, text);
   } catch {
-    return { state: shell, content: {}, error: "We couldn't map that explanation just now. Try submitting again." };
+    return {
+      state: shell,
+      content: {},
+      error:
+        "We couldn't map that explanation. Try adding a bit more detail — a sentence or two on how it works — then submit again.",
+    };
   }
 
   const claims: LessonClaim[] = debrief.claims.map((c) => ({

@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import Link from "next/link";
-import { Plus } from "@phosphor-icons/react/dist/ssr";
+import { useRouter } from "next/navigation";
 import { answerCurious, answerRepair, continueDebrief, selectFocus, submitExplanation, wrapUp } from "@/app/debrief/actions";
 import type { TurnContent, TurnResult } from "@/app/debrief/turn-types";
 import { FocusSelect } from "@/components/focus-select";
 import { ResponseField } from "@/components/response-field";
+import { SessionExit } from "@/components/session-exit";
 import { Thinking } from "@/components/thinking";
 import { UnderstandingMap } from "@/components/understanding-map";
 import { createInitialState } from "@/core/reducer";
 import type { ClaimState, Lesson, SessionState, Verdict } from "@/core/types";
 import {
   clearDraft,
+  clearSession,
   draftKey,
   loadSession,
   saveSession,
@@ -80,6 +81,7 @@ export function DebriefRunner({
   const [content, setContent] = useState<TurnContent>({});
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // Restore a saved session on reload (browser-only, so it runs after mount to
   // stay hydration-safe). No save yet → persist the fresh session so this debrief
@@ -133,6 +135,14 @@ export function DebriefRunner({
     }
   }
 
+  // Leave the current session: clear it, then reset (open path) or head to the
+  // library (authored). The confirm, when the session is underway, lives in SessionExit.
+  function exit() {
+    clearSession(initialLesson.slug);
+    if (onExit) onExit();
+    else router.push("/lessons");
+  }
+
   // The input area: a thinking shimmer while a turn runs, else the field (+ any recoverable error).
   function inputArea(
     field: string,
@@ -158,33 +168,11 @@ export function DebriefRunner({
     );
   }
 
-  // A quiet "new debrief" escape. On the open path it resets to the concept entry;
-  // on authored runs it links to a fresh open concept (leaving this lesson saved).
-  function ExitControl({ wide }: { wide: boolean }) {
-    const cls =
-      "inline-flex items-center gap-1.5 font-mono text-[0.65rem] tracking-[0.16em] uppercase text-muted-ink transition-colors hover:text-amber";
-    return (
-      <div className={`mx-auto w-full px-6 pt-6 ${wide ? "max-w-6xl" : "max-w-2xl"}`}>
-        {onExit ? (
-          <button onClick={onExit} className={cls}>
-            <Plus weight="bold" className="size-3" />
-            New debrief
-          </button>
-        ) : (
-          <Link href="/debrief/new" className={cls}>
-            <Plus weight="bold" className="size-3" />
-            New debrief
-          </Link>
-        )}
-      </div>
-    );
-  }
-
   // Explanation: a single focused column; write cold, no map/claims revealed yet.
   if (state.stage === "explanation") {
     return (
       <>
-        <ExitControl wide={false} />
+        <SessionExit stage={state.stage} onExit={exit} wide={false} />
         <div className="mx-auto flex w-full max-w-2xl flex-col px-6 pt-10 pb-20">
         <Eyebrow>{lesson.title}</Eyebrow>
         <p className="mt-4 font-serif text-2xl leading-snug text-ivory">{lesson.objective}</p>
@@ -382,7 +370,7 @@ export function DebriefRunner({
 
   return (
     <>
-      <ExitControl wide />
+      <SessionExit stage={state.stage} onExit={exit} wide />
       <TwoPane left={left} map={map} />
     </>
   );

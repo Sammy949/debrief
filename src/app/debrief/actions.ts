@@ -226,3 +226,19 @@ export async function answerRepair(
   const next = reduce(state, { type: "ANSWER_REPAIR", text, evaluation });
   return { state: next, content: {} };
 }
+
+/**
+ * Checkpoint → keep going: the reducer picks the next weakest claim and returns to
+ * `probe`; we generate that probe against the learner's original explanation so the
+ * question has context. No new AI judgment — CONTINUE is pure navigation.
+ */
+export async function continueDebrief(lesson: Lesson, state: SessionState): Promise<TurnResult> {
+  const next = reduce(state, { type: "CONTINUE" });
+  if (next.stage !== "probe") return { state: next, content: {} };
+  return { state: next, content: await curiousContent(lesson, next, next.explanationText) };
+}
+
+/** Checkpoint → wrap up: settle on the map as it stands. No AI. */
+export async function wrapUp(state: SessionState): Promise<TurnResult> {
+  return { state: reduce(state, { type: "WRAP_UP" }), content: {} };
+}

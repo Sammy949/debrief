@@ -21,9 +21,12 @@ export type ClaimState = (typeof CLAIM_STATES)[number];
  * objective/orientation is shown by the UI on that screen, so no separate stage
  * or event is needed. The teaching intervention and its "Try it" repair prompt
  * share one screen, so ANSWER_REPAIR fires from `teaching`; there is no distinct
- * `repair` stage and no intermediate event. The reducer owns every transition.
+ * `repair` stage and no intermediate event. After a claim resolves and other
+ * claims are still open, the session pauses at `checkpoint` and lets the learner
+ * choose to CONTINUE (probe the next weakest claim) or WRAP_UP (settle). The
+ * reducer owns every transition.
  */
-export const STAGES = ["explanation", "probe", "teaching", "summary"] as const;
+export const STAGES = ["explanation", "probe", "teaching", "checkpoint", "summary"] as const;
 export type Stage = (typeof STAGES)[number];
 
 /** When a claim was (re)evaluated — labels the summary's before/after trail. */
@@ -136,6 +139,9 @@ export interface SessionState {
   brokeAtProbe: boolean;
   verdict: Verdict | null;
   trajectory: ClaimSnapshot[];
+  /** The learner's original explanation, kept so a later claim's probe can be
+   *  generated against what they actually wrote (open + authored paths). */
+  explanationText: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -171,6 +177,9 @@ export type FocusEvaluation =
 export type DebriefEvent =
   | { type: "SUBMIT_EXPLANATION"; text: string; evaluation: ExplanationEvaluation }
   | { type: "ANSWER_CURIOUS"; text: string; evaluation: FocusEvaluation }
-  | { type: "ANSWER_REPAIR"; text: string; evaluation: FocusEvaluation };
+  | { type: "ANSWER_REPAIR"; text: string; evaluation: FocusEvaluation }
+  /** Learner choices at a checkpoint — no AI judgment, pure navigation. */
+  | { type: "CONTINUE" }
+  | { type: "WRAP_UP" };
 
 export type DebriefEventType = DebriefEvent["type"];

@@ -96,13 +96,40 @@ describe("the loop", () => {
     expect(s.verdict).toBe("solid_understanding");
   });
 
-  it("probe holds but the map is incomplete → gap_to_revisit", () => {
+  it("probe holds but the map is incomplete → checkpoint, then wrap up → gap_to_revisit", () => {
     let s = createInitialState(lesson);
     s = reduce(s, { type: "SUBMIT_EXPLANATION", text: "the explanation", evaluation: expl([solid("c1"), attention("c2", "the explanation"), unclear("c3")]) });
     expect(s.focusClaimId).toBe("c2");
     s = reduce(s, { type: "ANSWER_CURIOUS", text: "clarified", evaluation: fSolid });
+    // c2 is solid now, but c3 is still unclear → the session pauses, it doesn't end.
+    expect(s.stage).toBe("checkpoint");
+    s = reduce(s, { type: "WRAP_UP" });
     expect(s.stage).toBe("summary");
     expect(s.verdict).toBe("gap_to_revisit"); // c3 still unclear
+  });
+
+  it("keep going advances to the next weakest claim and re-probes", () => {
+    let s = createInitialState(lesson);
+    s = reduce(s, { type: "SUBMIT_EXPLANATION", text: "the explanation", evaluation: expl([solid("c1"), attention("c2", "the explanation"), unclear("c3")]) });
+    s = reduce(s, { type: "ANSWER_CURIOUS", text: "clarified", evaluation: fSolid });
+    expect(s.stage).toBe("checkpoint");
+    s = reduce(s, { type: "CONTINUE" });
+    // next weakest open claim is c3 (unclear), never the just-solved c2.
+    expect(s.stage).toBe("probe");
+    expect(s.focusClaimId).toBe("c3");
+    // resolving it too, with nothing left open, settles the whole map.
+    s = reduce(s, { type: "ANSWER_CURIOUS", text: "c3 explained", evaluation: fSolid });
+    expect(s.stage).toBe("summary");
+    // nothing ever broke AT a probe (c2 was self-corrected there), so it reads as solid.
+    expect(s.verdict).toBe("solid_understanding");
+  });
+
+  it("continue is ignored off a checkpoint; wrap up only settles from a checkpoint", () => {
+    let s = createInitialState(lesson);
+    s = reduce(s, { type: "SUBMIT_EXPLANATION", text: "x", evaluation: expl([solid("c1"), solid("c2"), untested("c3")]) });
+    expect(s.stage).toBe("probe");
+    expect(reduce(s, { type: "CONTINUE" })).toBe(s);
+    expect(reduce(s, { type: "WRAP_UP" })).toBe(s);
   });
 
   it("break → teach → repair recovers → understanding_strengthened", () => {

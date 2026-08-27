@@ -19,8 +19,9 @@ import type {
   Verdict,
 } from "./types";
 
-/** Hard backstop so a session can never loop forever. The happy path uses 3. */
-export const MAX_TURNS = 6;
+/** Hard backstop so a session can never loop forever. Raised for multi-claim
+ *  sessions: explanation + several probe/repair cycles before the cap bites. */
+export const MAX_TURNS = 12;
 
 /** Focus priority: a live misconception is the most valuable single probe. */
 const WEAKNESS_PRIORITY: Record<ClaimState, number> = {
@@ -56,6 +57,7 @@ export function createInitialState(lesson: Lesson): SessionState {
     brokeAtProbe: false,
     verdict: null,
     trajectory: [],
+    explanationText: "",
   };
 }
 
@@ -179,6 +181,21 @@ function toSummary(state: SessionState): SessionState {
   return { ...settled, verdict: aggregateVerdict(settled) };
 }
 
+/**
+ * Claims still worth a probe, EXCLUDING the one just worked — so continuing never
+ * immediately re-focuses the same claim (that would loop on a stubborn gap; the
+ * turn cap and the learner's "wrap up" are the ways out). Empty ⇒ nothing left to
+ * offer, so the session settles instead of pausing at a checkpoint.
+ */
+function openClaimsAfter(state: SessionState): Claim[] {
+  return state.claims.filter((c) => c.state !== "solid" && c.id !== state.focusClaimId);
+}
+
+/** After a claim resolves: pause at a checkpoint if there's more to work on, else settle. */
+function resolveOrCheckpoint(state: SessionState): SessionState {
+  return openClaimsAfter(state).length > 0 ? { ...state, stage: "checkpoint" } : toSummary(state);
+}
+
 // ---------------------------------------------------------------------------
 // The reducer.
 // ---------------------------------------------------------------------------
@@ -220,6 +237,7 @@ export function reduce(state: SessionState, event: DebriefEvent): SessionState {
         stage: "probe",
         turnCount: state.turnCount + 1,
         trajectory,
+        explanationText: event.text,
       };
     }
 
@@ -235,11 +253,11 @@ export function reduce(state: SessionState, event: DebriefEvent): SessionState {
         trajectory: [...state.trajectory, snapshotFocus(focus, "probe")],
       };
 
-      // Held → straight to a verdict. Broke → teaching is mandatory.
+      // Broke → teaching is mandatory. Held → resolve (checkpoint or settle).
       if (shouldTeach(focus.state)) {
         return { ...next, stage: "teaching", brokeAtProbe: true };
       }
-      return toSummary({ ...next, brokeAtProbe: false });
+      return resolveOrCheckpoint(next);
     }
 
     case "ANSWER_REPAIR": {
@@ -247,12 +265,26 @@ export function reduce(state: SessionState, event: DebriefEvent): SessionState {
 
       const claims = applyFocusEval(state, event.evaluation, event.text);
       const focus = claims.find((c) => c.id === state.focusClaimId)!;
-      return toSummary({
+      return resolveOrCheckpoint({
         ...state,
         claims,
         turnCount: state.turnCount + 1,
         trajectory: [...state.trajectory, snapshotFocus(focus, "repair")],
       });
+    }
+
+    // Learner chose to keep going: focus the next weakest open claim and re-probe.
+    case "CONTINUE": {
+      if (state.stage !== "checkpoint") return state;
+      const focus = selectFocusClaim(openClaimsAfter(state));
+      if (!focus) return toSummary(state);
+      return { ...state, stage: "probe", focusClaimId: focus.claimId, focusKind: focus.kind };
+    }
+
+    // Learner chose to wrap up: settle on the map as it stands.
+    case "WRAP_UP": {
+      if (state.stage !== "checkpoint") return state;
+      return toSummary(state);
     }
 
     default:

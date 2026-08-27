@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { answerCurious, answerRepair, submitExplanation } from "@/app/debrief/actions";
+import { answerCurious, answerRepair, continueDebrief, submitExplanation, wrapUp } from "@/app/debrief/actions";
 import type { TurnContent, TurnResult } from "@/app/debrief/turn-types";
 import { ResponseField } from "@/components/response-field";
 import { Thinking } from "@/components/thinking";
@@ -210,6 +210,45 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           "Try it",
           (text) => runTurn(() => answerRepair(lesson, state, text)),
           { filename: "~/repair.md" },
+        )}
+      </>
+    );
+  } else if (state.stage === "checkpoint") {
+    const solidCount = state.claims.filter((c) => c.state === "solid").length;
+    const total = state.claims.length;
+    const justWorked = state.claims.find((c) => c.id === state.focusClaimId);
+    const line =
+      justWorked?.state === "solid"
+        ? `${justWorked.shortLabel} is solid now.`
+        : justWorked
+          ? `${justWorked.shortLabel} is clearer — we can come back to it.`
+          : "Good progress.";
+    left = (
+      <>
+        <Eyebrow>nice work</Eyebrow>
+        <h2 className="mt-4 font-serif text-3xl leading-snug tracking-tight text-ivory">{line}</h2>
+        <p className="mt-3 text-lg leading-relaxed text-ivory-dim">
+          {solidCount} of {total} claims are holding. Want to keep going, or wrap up here?
+        </p>
+        {pending ? (
+          <div className="mt-8">
+            <Thinking label="Lining up the next one…" />
+          </div>
+        ) : (
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <button
+              onClick={() => runTurn(() => continueDebrief(lesson, state))}
+              className="inline-flex items-center bg-ivory px-6 py-3 font-medium text-obsidian transition-colors hover:bg-amber focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
+            >
+              Keep going
+            </button>
+            <button
+              onClick={() => runTurn(() => wrapUp(state))}
+              className="inline-flex items-center border border-line px-6 py-3 font-medium text-ivory transition-colors hover:bg-surface-high"
+            >
+              Wrap up
+            </button>
+          </div>
         )}
       </>
     );

@@ -31,7 +31,7 @@ const PRINCIPLES = [
   },
 ] as const;
 
-/** A load-path that carries, then breaks — the signature fracture, drawn large. */
+/** A load-path that carries, then breaks: the signature fracture, drawn large. */
 function FractureGraphic() {
   return (
     <div

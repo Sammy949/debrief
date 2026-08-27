@@ -1,4 +1,4 @@
-/** The shared "working" state — one warm line with a single live beat.
+/** The shared "working" state: one warm line with a single live beat.
  *  Used for every Groq turn so waiting feels consistent across the app. */
 export function Thinking({ label }: { label: string }) {
   return (

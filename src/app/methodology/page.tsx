@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "How Debrief works: the teach-back loop, the understanding map, the claim states, and the model-plus-reducer pipeline behind it.",
 };
 
-// A frozen sample map — the closures debrief mid-session, one claim fractured —
+// A frozen sample map: the closures debrief mid-session, one claim fractured,
 // so the methodology page shows the real component, not a picture of one.
 const SAMPLE_CLAIMS: Claim[] = [
   {

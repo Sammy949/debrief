@@ -111,7 +111,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
     );
   }
 
-  // Explanation: a single focused column — write cold, no map/claims revealed yet.
+  // Explanation: a single focused column; write cold, no map/claims revealed yet.
   if (state.stage === "explanation") {
     return (
       <div className="mx-auto flex w-full max-w-2xl flex-col px-6 py-20">
@@ -150,7 +150,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
   let left: ReactNode;
 
   if (state.stage === "probe") {
-    // Secondary safety net only — the action already resolves a per-kind fallback.
+    // Secondary safety net only; the action already resolves a per-kind fallback.
     const probeFallback =
       state.focusKind === "unaddressed"
         ? lesson.fallbackUnaddressedQuestion

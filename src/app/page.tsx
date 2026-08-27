@@ -17,7 +17,7 @@ export default function Home() {
       <main className="flex flex-1 flex-col">
         {/* ---- hero: editorial split over a fading drafting grid ---- */}
         <section className="relative overflow-hidden border-b border-line pt-28 pb-24">
-          {/* background grid on its own layer, faded downward — content stays at full opacity */}
+          {/* background grid on its own layer, faded downward; content stays at full opacity */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-grid-pattern gradient-mask-b"
@@ -60,7 +60,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* right: two layered artifacts — the prompt, and the map it produces */}
+            {/* right: two layered artifacts: the prompt, and the map it produces */}
             <div className="md:col-span-6">
               <HeroArtifacts />
             </div>

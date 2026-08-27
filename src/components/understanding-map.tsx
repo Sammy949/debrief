@@ -16,7 +16,7 @@ const STATE_TONE: Record<ClaimState, string> = {
 
 /**
  * The node where the beam of understanding crosses this stratum. A sharp square
- * on the vertical beam — solid and clean when the claim holds, split into two
+ * on the vertical beam: solid and clean when the claim holds, split into two
  * offset amber shards (the refraction) when it fractures, hollow when unreached.
  * The obsidian box masks the beam line behind it.
  */
@@ -83,7 +83,7 @@ function Stratum({ state }: { state: ClaimState }) {
   );
 }
 
-/** The compact state key — makes the map legible in five seconds. */
+/** The compact state key: makes the map legible in five seconds. */
 function Legend() {
   const items: ClaimState[] = ["solid", "unclear", "needs_attention", "untested"];
   return (
@@ -123,7 +123,7 @@ export interface UnderstandingMapProps {
 /**
  * The signature: understanding as a single beam descending through the strata of
  * an explanation. Each claim is one stratum; the beam threads them top to bottom;
- * its state at each crossing — clean, porous, fractured, or unreached — is what
+ * its state at each crossing (clean, porous, fractured, or unreached) is what
  * the explanation is actually carrying. Reducer-driven and read-only.
  */
 export function UnderstandingMap({

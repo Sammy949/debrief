@@ -7,7 +7,7 @@ export default function NotFound() {
     <>
       <SiteHeader />
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-32 text-center">
-        {/* a load-path that doesn't connect — the page that isn't there */}
+        {/* a load-path that doesn't connect: the page that isn't there */}
         <span className="flex items-center" aria-hidden="true">
           <span className="h-[3px] w-16 bg-ivory-dim" />
           <span className="w-4" />

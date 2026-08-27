@@ -18,19 +18,19 @@ const STATE_WORD: Record<ClaimState, string> = {
 
 const VERDICT: Record<Verdict, { title: string; line: string; next: string }> = {
   solid_understanding: {
-    title: "Solid understanding",
-    line: "Your explanation held up under pressure. Every claim carried its weight.",
+    title: "Nailed it.",
+    line: "Your explanation held up under pressure — every claim carried its weight.",
     next: "Come back to a harder concept while this is fresh.",
   },
   understanding_strengthened: {
-    title: "Your explanation got stronger",
-    line: "You hit one weak point, saw exactly where it broke, and repaired it.",
-    next: "Try the idea once more in a new situation to make it durable.",
+    title: "That got stronger.",
+    line: "You hit one weak point, saw exactly where it broke, and fixed it.",
+    next: "Try the idea once more in a new spot to make it stick.",
   },
   gap_to_revisit: {
-    title: "A gap to revisit",
-    line: "You made real progress, but part of the idea still needs another pass.",
-    next: "Revisit the focus point when you have a few minutes.",
+    title: "One to come back to.",
+    line: "You made real progress — part of this just needs another pass.",
+    next: "Circle back to the focus point when you've got a few minutes.",
   },
 };
 
@@ -118,10 +118,10 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
         <Eyebrow>{lesson.title}</Eyebrow>
         <p className="mt-4 font-serif text-2xl leading-snug text-ivory">{lesson.objective}</p>
         <p className="mt-10 font-medium text-ivory">
-          Explain it as if you were teaching someone curious but new to it.
+          Explain it like you&apos;re teaching a curious friend who&apos;s new to it.
         </p>
         <p className="mt-1 mb-5 text-sm text-muted-ink">
-          Use your own words. You don&apos;t need to be perfect.
+          Your own words are perfect — don&apos;t overthink it.
         </p>
         {inputArea(
           "Reading what you wrote…",
@@ -164,7 +164,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           {content.curiousQuestion ?? probeFallback}
         </p>
         {inputArea(
-          "Thinking about your answer…",
+          "Working through your answer…",
           "Answer",
           (text) => runTurn(() => answerCurious(lesson, state, text)),
           { filename: "~/answer.md" },
@@ -201,7 +201,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           </div>
         )}
 
-        <Eyebrow>try it</Eyebrow>
+        <Eyebrow>your turn</Eyebrow>
         <p className="mt-4 mb-6 font-serif text-2xl leading-snug text-ivory">
           {content.repairQuestion ?? lesson.fallbackRepairQuestion}
         </p>
@@ -240,7 +240,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
         )}
 
         <div className="mt-10">
-          <Eyebrow>what to do next</Eyebrow>
+          <Eyebrow>what&apos;s next</Eyebrow>
           <p className="mt-3 text-ivory">{verdict?.next}</p>
         </div>
 
@@ -248,7 +248,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           onClick={restart}
           className="mt-12 border border-line px-6 py-3 font-mono text-[0.7rem] font-medium tracking-[0.16em] uppercase text-ivory transition-colors hover:border-amber hover:text-amber"
         >
-          Start over
+          Go again
         </button>
       </>
     );

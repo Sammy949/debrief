@@ -62,6 +62,11 @@ function normalizeFocusEval(e: {
 const FLAGSHIP: GroqModel = "openai/gpt-oss-120b"; // reliability-critical: evaluate + scaffold
 const FAST: GroqModel = "openai/gpt-oss-20b"; //  generative: question / intervention / repair
 
+// Shared voice for everything the learner reads. Evaluators stay neutral; the
+// generative prompts (questions, teaching) speak in this coach voice.
+const TONE =
+  "Voice: an encouraging coach — warm, second person, a little momentum. A brief, genuine bit of reassurance is welcome; keep it plain and human, never clinical or rubric-like. Contractions are good. No emoji.";
+
 const CLAIM_STATE_ENUM = ["solid", "unclear", "needs_attention", "untested"] as const;
 
 // --- strict request schemas (flat, root-object, strict-mode compliant) ----
@@ -224,6 +229,7 @@ export async function generateWeaknessQuestion(
     "You are a curious, patient reviewer in a teach-back tool.",
     "The learner's account of this claim is weak or partly off. Ask ONE short, naive follow-up question that probes exactly the weakest point of what they said.",
     "It must be answerable in a sentence or two and must NOT reveal the answer. Return only the question.",
+    TONE,
   ].join("\n");
 
   const user = `Concept: ${lesson.title}\nClaim to probe: ${focusClaim.claim}\nWhy it matters: ${focusClaim.whyItMatters}\n\nWhat the learner said:\n"""${learnerText}"""`;
@@ -249,6 +255,7 @@ export async function generateUnaddressedQuestion(
     "You are a warm, direct reviewer in a teach-back tool.",
     "The learner has NOT yet addressed one part of this concept. Ask ONE friendly, direct question inviting them to explain that specific part in their own words.",
     "Do NOT imply they already claimed anything about it. Do NOT ask a hypothetical 'what if' question. Name the actual gap. One or two sentences. Return only the question.",
+    TONE,
   ].join("\n");
 
   const user = `Concept: ${lesson.title}\nThe part they haven't covered yet: ${focusClaim.claim}\nWhy it matters: ${focusClaim.whyItMatters}`;
@@ -275,6 +282,7 @@ export async function generateVerificationQuestion(
     "You are a curious reviewer in a teach-back tool. The learner explained every essential claim solidly, so this is a transfer check, not a correction.",
     "Point to a SPECIFIC, concrete example or scenario and ask what happens in it — so the learner has to use the idea, not restate it.",
     "Sound like a curious person, not a rubric. NEVER use abstract phrasing like 'apply this in a new situation' or 'use this idea in a new context'; name an actual case instead. One or two sentences, answerable briefly, and don't reveal the answer. Return only the question.",
+    TONE,
   ].join("\n");
 
   const user = `Concept: ${lesson.title}\nClaim to stress-test: ${focusClaim.claim}\nWhy it matters: ${focusClaim.whyItMatters}\n\nWhat the learner said:\n"""${learnerText}"""`;
@@ -333,6 +341,7 @@ export async function generateTeachingIntervention(
     "Ground the correction in the provided teaching note — do NOT introduce new claims or contradict it.",
     "Return: distinction (one or two sentences correcting the specific misunderstanding), example (one short, concrete example or contrast that makes it click), takeaway (one short sentence to hold onto).",
     "Plain language. No lecture.",
+    TONE,
   ].join("\n");
 
   const user = `Concept: ${lesson.title}\nClaim: ${focusClaim.claim}\nTeaching note (source of truth): ${focusClaim.teachingNote}${
@@ -360,6 +369,7 @@ export async function generateRepairQuestion(
   const system = [
     "Ask ONE question that forces the learner to USE the repaired idea in a new situation (type 'apply'), or to explain WHY it works (type 'why').",
     "Prefer 'apply' when the concept has a concrete application. Ground it in a SPECIFIC example — name the case rather than saying 'a new situation' abstractly. Warm, plain, human phrasing, answerable in a few sentences, and it must require using the correction, not restating a definition.",
+    TONE,
   ].join("\n");
 
   const scenario = lesson.applicationScenarios[0] ?? "";

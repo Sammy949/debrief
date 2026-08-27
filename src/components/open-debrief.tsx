@@ -40,8 +40,8 @@ export function OpenDebrief() {
         What do you want to understand?
       </h1>
       <p className="mt-4 text-lg leading-relaxed text-ivory-dim">
-        Name a concept you think you know. Debrief maps what a strong explanation needs, then tests
-        whether yours holds.
+        Name something you think you&apos;ve got down. Debrief maps what a strong explanation needs,
+        then sees if yours holds up.
       </p>
 
       <form

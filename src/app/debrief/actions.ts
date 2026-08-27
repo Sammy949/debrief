@@ -103,7 +103,7 @@ function openLessonShell(concept: string): Lesson {
   return {
     slug: slugify(title),
     title,
-    objective: `Explain ${title} in your own words — clearly enough that it holds up when someone asks about it.`,
+    objective: `Explain ${title} in your own words — well enough that it holds up when someone digs in.`,
     difficulty: "intermediate",
     mode: "open",
     claims: [],
@@ -112,12 +112,12 @@ function openLessonShell(concept: string): Lesson {
     applicationScenarios: [],
     misconceptions: [],
     fallbackWeaknessQuestion:
-      "Which part of that feels shakiest to you? Try explaining just that piece a little more.",
+      "Which part feels shakiest to you? Take another run at just that piece.",
     fallbackUnaddressedQuestion:
-      "There's a part of this you haven't touched on yet — can you walk me through it?",
+      "There's one piece you haven't touched yet — walk me through it?",
     fallbackVerificationQuestion:
-      "Where else does this show up? Pick a real example and tell me what happens.",
-    fallbackRepairQuestion: "Try it on a fresh example — what happens, and why?",
+      "You've got the core — let's stretch it. Pick a real example where this shows up and walk through what happens.",
+    fallbackRepairQuestion: "Now put it to work — try it on a fresh example. What happens, and why?",
   };
 }
 
@@ -147,7 +147,7 @@ async function submitOpenExplanation(lesson: Lesson, text: string): Promise<Turn
       state: shell,
       content: {},
       error:
-        "Hmm, I couldn't quite map that one. Try adding a sentence or two on how it works, and give it another go.",
+        "Almost! I need a bit more to go on — add a line or two on how it works, and let's try again.",
     };
   }
 
@@ -182,7 +182,7 @@ export async function submitExplanation(
     evaluation = await evaluateExplanation(lesson, text);
   } catch (err) {
     console.error("[debrief] evaluateExplanation failed:", err);
-    return { state, content: {}, error: "I had trouble reading that one. Mind sending it again?" };
+    return { state, content: {}, error: "That didn't come through — mind sending it again?" };
   }
   const next = reduce(state, { type: "SUBMIT_EXPLANATION", text, evaluation });
   return { state: next, content: await curiousContent(lesson, next, text) };
@@ -194,14 +194,14 @@ export async function answerCurious(
   text: string,
 ): Promise<TurnResult> {
   const focusClaim = focusClaimOf(lesson, state);
-  if (!focusClaim) return { state, content: {}, error: "I lost the thread there — let's start over." };
+  if (!focusClaim) return { state, content: {}, error: "Lost the thread there — let's start fresh." };
 
   let evaluation: FocusEvaluation;
   try {
     evaluation = await evaluateFocusAnswer(lesson, focusClaim, text);
   } catch (err) {
     console.error("[debrief] evaluateFocusAnswer (curious) failed:", err);
-    return { state, content: {}, error: "I had trouble reading that — try again?" };
+    return { state, content: {}, error: "That didn't come through — give it another go?" };
   }
   const next = reduce(state, { type: "ANSWER_CURIOUS", text, evaluation });
   const content = next.stage === "teaching" ? await teachingContent(lesson, next) : {};
@@ -214,14 +214,14 @@ export async function answerRepair(
   text: string,
 ): Promise<TurnResult> {
   const focusClaim = focusClaimOf(lesson, state);
-  if (!focusClaim) return { state, content: {}, error: "I lost the thread there — let's start over." };
+  if (!focusClaim) return { state, content: {}, error: "Lost the thread there — let's start fresh." };
 
   let evaluation: FocusEvaluation;
   try {
     evaluation = await evaluateFocusAnswer(lesson, focusClaim, text);
   } catch (err) {
     console.error("[debrief] evaluateFocusAnswer (repair) failed:", err);
-    return { state, content: {}, error: "I had trouble reading that — try again?" };
+    return { state, content: {}, error: "That didn't come through — give it another go?" };
   }
   const next = reduce(state, { type: "ANSWER_REPAIR", text, evaluation });
   return { state: next, content: {} };

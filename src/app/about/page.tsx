@@ -114,10 +114,10 @@ export default function AboutPage() {
               <em className="italic text-amber">survives a question.</em>
             </h1>
             <p className="mt-8 max-w-xl text-lg leading-relaxed text-ivory-dim">
-              Debrief is a teach-back tool. You explain a concept in your own
-              words; it maps what a strong explanation must carry, probes the
-              weakest point, and shows you the exact sentence where it stops
-              holding — then helps you repair it.
+              Debrief is a teach-back tool. Rather than grade you, it listens like
+              a sharp, curious friend: you explain something out loud, and it finds
+              the one place your understanding quietly gives way — then helps you
+              shore it up.
             </p>
           </div>
         </section>
@@ -188,7 +188,7 @@ export default function AboutPage() {
         <section className="border-t border-line">
           <div className="mx-auto flex w-full max-w-6xl flex-col items-start gap-8 px-6 py-24 md:flex-row md:items-center md:justify-between">
             <h2 className="max-w-lg font-serif text-3xl leading-snug tracking-tight text-ivory">
-              Pick something you think you understand.
+              Find the edge of what you know.
             </h2>
             <Link
               href="/debrief/new"

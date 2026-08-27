@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Brain, ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { Dialog } from "@base-ui/react/dialog";
+import { Brain, ArrowRight, List, X } from "@phosphor-icons/react/dist/ssr";
 
 const NAV = [
   { label: "Methodology", href: "/methodology" },
@@ -12,6 +14,9 @@ const NAV = [
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-obsidian">
@@ -21,33 +26,86 @@ export function SiteHeader() {
           <span className="font-serif text-2xl tracking-tight text-ivory">Debrief</span>
         </Link>
 
+        {/* desktop nav */}
         <nav className="hidden items-center gap-8 md:flex">
-          {NAV.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={
-                  active
-                    ? "border-b border-ivory pb-1 text-sm text-ivory"
-                    : "pb-1 text-sm text-muted-ink transition-colors hover:text-ivory"
-                }
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+          {NAV.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              aria-current={isActive(item.href) ? "page" : undefined}
+              className={
+                isActive(item.href)
+                  ? "border-b border-ivory pb-1 text-sm text-ivory"
+                  : "pb-1 text-sm text-muted-ink transition-colors hover:text-ivory"
+              }
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
+        {/* desktop action */}
         <Link
           href="/debrief/new"
-          className="inline-flex items-center gap-2 bg-ivory px-4 py-2 font-mono text-[0.7rem] font-medium tracking-[0.14em] uppercase text-obsidian transition-colors hover:bg-amber"
+          className="hidden items-center gap-2 bg-ivory px-4 py-2 font-mono text-[0.7rem] font-medium tracking-[0.14em] uppercase text-obsidian transition-colors hover:bg-amber md:inline-flex"
         >
           Get Started
           <ArrowRight weight="bold" className="size-3.5" />
         </Link>
+
+        {/* mobile menu */}
+        <Dialog.Root open={open} onOpenChange={setOpen}>
+          <Dialog.Trigger
+            aria-label="Open menu"
+            className="flex size-9 items-center justify-center border border-line text-ivory transition-colors hover:border-amber hover:text-amber md:hidden"
+          >
+            <List weight="bold" className="size-5" />
+          </Dialog.Trigger>
+
+          <Dialog.Portal>
+            <Dialog.Backdrop className="fixed inset-0 z-50 bg-obsidian/80 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+            <Dialog.Popup className="fixed inset-y-0 right-0 z-50 flex w-[82%] max-w-xs flex-col border-l border-line bg-surface transition-transform duration-300 ease-out data-[ending-style]:translate-x-full data-[starting-style]:translate-x-full">
+              <div className="flex items-center justify-between border-b border-line px-6 py-4">
+                <Dialog.Title className="font-serif text-xl tracking-tight text-ivory">
+                  Debrief
+                </Dialog.Title>
+                <Dialog.Close
+                  aria-label="Close menu"
+                  className="flex size-9 items-center justify-center border border-line text-ivory transition-colors hover:border-amber hover:text-amber"
+                >
+                  <X weight="bold" className="size-5" />
+                </Dialog.Close>
+              </div>
+
+              <nav className="flex flex-col px-6 py-4">
+                {NAV.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    aria-current={isActive(item.href) ? "page" : undefined}
+                    className={`border-b border-line py-4 font-serif text-2xl tracking-tight transition-colors ${
+                      isActive(item.href) ? "text-amber" : "text-ivory hover:text-amber"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="mt-auto p-6">
+                <Link
+                  href="/debrief/new"
+                  onClick={() => setOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 bg-ivory px-4 py-3.5 font-mono text-[0.7rem] font-medium tracking-[0.16em] uppercase text-obsidian transition-colors hover:bg-amber"
+                >
+                  Get Started
+                  <ArrowRight weight="bold" className="size-3.5" />
+                </Link>
+              </div>
+            </Dialog.Popup>
+          </Dialog.Portal>
+        </Dialog.Root>
       </div>
     </header>
   );

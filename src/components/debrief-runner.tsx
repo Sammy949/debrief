@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { answerCurious, answerRepair, submitExplanation } from "@/app/debrief/actions";
 import type { TurnContent, TurnResult } from "@/app/debrief/turn-types";
 import { ResponseField } from "@/components/response-field";
+import { Thinking } from "@/components/thinking";
 import { UnderstandingMap } from "@/components/understanding-map";
 import { createInitialState } from "@/core/reducer";
 import type { ClaimState, Lesson, SessionState, Verdict } from "@/core/types";
@@ -38,14 +39,6 @@ function Eyebrow({ children }: { children: ReactNode }) {
   return (
     <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
       {children}
-    </p>
-  );
-}
-
-function Thinking({ label }: { label: string }) {
-  return (
-    <p className="shimmer font-mono text-[0.7rem] tracking-[0.16em] uppercase" aria-live="polite">
-      {label}
     </p>
   );
 }
@@ -131,7 +124,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           Use your own words. You don&apos;t need to be perfect.
         </p>
         {inputArea(
-          "Reading your explanation…",
+          "Reading what you wrote…",
           "Submit explanation",
           (text) => runTurn(() => submitExplanation(lesson, state, text)),
           {
@@ -171,7 +164,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           {content.curiousQuestion ?? probeFallback}
         </p>
         {inputArea(
-          "Considering your answer…",
+          "Thinking about your answer…",
           "Answer",
           (text) => runTurn(() => answerCurious(lesson, state, text)),
           { filename: "~/answer.md" },
@@ -213,7 +206,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           {content.repairQuestion ?? lesson.fallbackRepairQuestion}
         </p>
         {inputArea(
-          "Checking your repair…",
+          "Seeing how that holds up…",
           "Try it",
           (text) => runTurn(() => answerRepair(lesson, state, text)),
           { filename: "~/repair.md" },

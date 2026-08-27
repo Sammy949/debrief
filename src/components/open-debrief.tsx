@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { startOpenDebrief } from "@/app/debrief/actions";
 import { DebriefRunner } from "@/components/debrief-runner";
+import { Thinking } from "@/components/thinking";
 import type { Lesson } from "@/core/types";
 
 /** Open-concept entry: name a concept, Groq maps the claims, then run the debrief on it. */
@@ -60,9 +61,7 @@ export function OpenDebrief() {
         />
         <div className="mt-5">
           {pending ? (
-            <p className="shimmer font-mono text-[0.7rem] tracking-[0.16em] uppercase" aria-live="polite">
-              Mapping the concept…
-            </p>
+            <Thinking label="Setting things up…" />
           ) : (
             <>
               {error && (

@@ -148,7 +148,11 @@ export function UnderstandingMap({
         </p>
       </header>
 
-      <ol className="relative m-0 flex list-none flex-col gap-7 p-0">
+      {claims.length === 0 ? (
+        <MapSkeleton />
+      ) : (
+        <>
+          <ol className="relative m-0 flex list-none flex-col gap-7 p-0">
         {/* the beam: a single hairline the strata cross */}
         {claims.length > 0 && (
           <span
@@ -188,7 +192,34 @@ export function UnderstandingMap({
         })}
       </ol>
 
-      {claims.length > 0 && <Legend />}
+          <Legend />
+        </>
+      )}
     </section>
+  );
+}
+
+/** Shown while the first explanation is still being mapped: ghost strata, no data. */
+function MapSkeleton() {
+  return (
+    <div aria-hidden="true" className="relative flex flex-col gap-7">
+      <span className="absolute top-2 bottom-2 left-[calc(0.4375rem)] w-px bg-line" />
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="grid grid-cols-[0.875rem_1fr] items-start gap-x-4">
+          <span className="flex justify-center pt-0.5">
+            <span className="relative z-10 flex size-3.5 items-center justify-center bg-obsidian">
+              <span className="beam-fracture size-2 bg-line-strong" />
+            </span>
+          </span>
+          <div>
+            <span className="block h-3 w-2/3 bg-surface-high" />
+            <span className="mt-3 block h-[3px] w-full bg-line-strong" />
+          </div>
+        </div>
+      ))}
+      <p className="mt-1 font-mono text-[0.65rem] tracking-[0.14em] uppercase text-muted-ink">
+        Mapping what you wrote…
+      </p>
+    </div>
   );
 }

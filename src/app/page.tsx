@@ -1,11 +1,6 @@
 import Link from "next/link";
-import { Brain, ArrowRight } from "@phosphor-icons/react/dist/ssr";
-
-const NAV = [
-  { label: "Methodology", href: "#methodology", active: true },
-  { label: "Library", href: "/lessons", active: false },
-  { label: "About", href: "#about", active: false },
-];
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 
 /** The state of a stratum in the map-preview card. */
 const PREVIEW_STRATA = [
@@ -17,39 +12,7 @@ const PREVIEW_STRATA = [
 export default function Home() {
   return (
     <>
-      {/* ---- top nav ---- */}
-      <header className="sticky top-0 z-50 border-b border-line bg-obsidian">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Brain weight="duotone" className="size-5 text-amber" />
-            <span className="font-serif text-2xl tracking-tight text-ivory">Debrief</span>
-          </Link>
-
-          <nav className="hidden items-center gap-8 md:flex">
-            {NAV.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={
-                  item.active
-                    ? "border-b border-ivory pb-1 text-sm text-ivory"
-                    : "pb-1 text-sm text-muted-ink transition-colors hover:text-ivory"
-                }
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <Link
-            href="/debrief/new"
-            className="inline-flex items-center gap-2 bg-ivory px-4 py-2 font-mono text-[0.7rem] font-medium tracking-[0.14em] uppercase text-obsidian transition-colors hover:bg-amber"
-          >
-            Get Started
-            <ArrowRight weight="bold" className="size-3.5" />
-          </Link>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="flex flex-1 flex-col">
         {/* ---- hero: editorial split over a fading drafting grid ---- */}
@@ -89,7 +52,7 @@ export default function Home() {
                   Start a Session
                 </Link>
                 <Link
-                  href="#methodology"
+                  href="/methodology"
                   className="inline-flex items-center border border-line px-7 py-3 font-medium text-ivory transition-colors hover:bg-surface-high"
                 >
                   How it works
@@ -105,39 +68,7 @@ export default function Home() {
         </section>
       </main>
 
-      {/* ---- footer ---- */}
-      <footer className="mt-auto border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-8 px-6 py-14 md:flex-row md:items-end">
-          <div className="flex flex-col gap-3">
-            <span className="font-serif text-2xl text-ivory">Debrief</span>
-            <span className="max-w-xs text-sm leading-relaxed text-muted-ink">
-              Don&apos;t just learn it. Debrief it.
-            </span>
-          </div>
-          <div className="flex flex-col gap-3 md:items-end">
-            <nav className="flex flex-wrap gap-x-6 gap-y-2 md:justify-end">
-              <Link href="/lessons" className="text-sm text-muted-ink transition-colors hover:text-ivory">
-                Library
-              </Link>
-              <Link href="#methodology" className="text-sm text-muted-ink transition-colors hover:text-ivory">
-                Methodology
-              </Link>
-              <Link href="#about" className="text-sm text-muted-ink transition-colors hover:text-ivory">
-                About
-              </Link>
-              <Link href="/privacy" className="text-sm text-muted-ink transition-colors hover:text-ivory">
-                Privacy
-              </Link>
-              <Link href="/terms" className="text-sm text-muted-ink transition-colors hover:text-ivory">
-                Terms
-              </Link>
-            </nav>
-            <span className="font-mono text-[0.7rem] tracking-wide text-ghost">
-              © 2026 Debrief
-            </span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

@@ -7,52 +7,108 @@ const STATE_WORD: Record<ClaimState, string> = {
   untested: "not reached yet",
 };
 
-const STATE_COLOR: Record<ClaimState, string> = {
-  solid: "text-ink",
-  unclear: "text-ink-soft",
-  needs_attention: "text-sienna-deep",
-  untested: "text-ink-untested",
+const STATE_TONE: Record<ClaimState, string> = {
+  solid: "text-ivory-dim",
+  unclear: "text-muted-ink",
+  needs_attention: "text-amber",
+  untested: "text-ghost",
 };
 
 /**
- * The load-path rule: a claim's state written in one line, legible without
- * colour. solid = a complete member; unclear = under-drawn; needs_attention =
- * the fracture (two offset halves that don't meet); untested = never built.
+ * The node where the beam of understanding crosses this stratum. A sharp square
+ * on the vertical beam — solid and clean when the claim holds, split into two
+ * offset amber shards (the refraction) when it fractures, hollow when unreached.
+ * The obsidian box masks the beam line behind it.
  */
-function LoadPath({ state }: { state: ClaimState }) {
+function BeamNode({ state, focused }: { state: ClaimState; focused: boolean }) {
+  const ring = focused ? "outline outline-1 outline-offset-2 outline-amber" : "";
+  return (
+    <span className="relative z-10 flex size-3.5 items-center justify-center bg-obsidian">
+      {state === "needs_attention" ? (
+        <span className={`flex items-center ${ring}`} aria-hidden="true">
+          <span className="beam-fracture size-1.5 -translate-y-[2px] bg-amber" />
+          <span className="beam-fracture size-1.5 translate-y-[2px] bg-amber" />
+        </span>
+      ) : state === "untested" ? (
+        <span className={`size-2 border border-ghost ${ring}`} aria-hidden="true" />
+      ) : state === "unclear" ? (
+        <span className={`size-2 bg-muted-ink ${ring}`} aria-hidden="true" />
+      ) : (
+        <span className={`size-2 bg-ivory ${ring}`} aria-hidden="true" />
+      )}
+    </span>
+  );
+}
+
+/**
+ * The stratum itself, read left-to-right: a dense solid band when the claim
+ * holds; a porous, honeycombed band when it is under-drawn; the fractured amber
+ * break (two offset halves) at the weak point; a faint dotted trace when the
+ * claim has not been reached.
+ */
+function Stratum({ state }: { state: ClaimState }) {
   if (state === "needs_attention") {
     return (
-      <span className="flex h-4 items-center" aria-hidden="true">
-        <span className="h-[2px] w-12 -translate-y-1 rounded-full bg-sienna-deep" />
-        <span className="w-2.5" />
-        <span className="h-[2px] w-14 translate-y-1 rounded-full bg-sienna-deep" />
+      <span className="flex h-3 items-center" aria-hidden="true">
+        <span className="beam-fracture h-[2px] w-2/5 -translate-y-[3px] bg-amber" />
+        <span className="w-3" />
+        <span className="beam-fracture h-[2px] w-2/5 translate-y-[3px] bg-amber" />
       </span>
     );
   }
   if (state === "untested") {
     return (
-      <span className="flex h-4 items-center" aria-hidden="true">
-        <span className="w-28 border-t-2 border-dotted border-ink-ghost" />
+      <span className="flex h-3 items-center" aria-hidden="true">
+        <span className="w-2/3 border-t border-dotted border-ghost" />
       </span>
     );
   }
   if (state === "unclear") {
     return (
-      <span className="flex h-4 items-center" aria-hidden="true">
+      <span className="flex h-3 items-center" aria-hidden="true">
         <span
-          className="h-[2px] w-28 rounded-full bg-ink-soft"
+          className="h-[3px] w-full"
           style={{
-            WebkitMaskImage: "linear-gradient(90deg,#000 52%,transparent)",
-            maskImage: "linear-gradient(90deg,#000 52%,transparent)",
+            backgroundImage:
+              "repeating-linear-gradient(90deg,var(--muted-ink) 0 6px,transparent 6px 11px)",
           }}
         />
       </span>
     );
   }
   return (
-    <span className="flex h-4 items-center" aria-hidden="true">
-      <span className="h-[2px] w-28 rounded-full bg-ink" />
+    <span className="flex h-3 items-center" aria-hidden="true">
+      <span className="h-[3px] w-full bg-ivory-dim" />
     </span>
+  );
+}
+
+/** The compact state key — makes the map legible in five seconds. */
+function Legend() {
+  const items: ClaimState[] = ["solid", "unclear", "needs_attention", "untested"];
+  return (
+    <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-5 p-0">
+      {items.map((s) => (
+        <li key={s} className="flex list-none items-center gap-2">
+          <span className="flex w-4 justify-center">
+            {s === "needs_attention" ? (
+              <span className="flex items-center" aria-hidden="true">
+                <span className="size-1.5 bg-amber" />
+              </span>
+            ) : s === "untested" ? (
+              <span className="size-1.5 border border-ghost" aria-hidden="true" />
+            ) : s === "unclear" ? (
+              <span className="size-1.5 bg-muted-ink" aria-hidden="true" />
+            ) : (
+              <span className="size-1.5 bg-ivory" aria-hidden="true" />
+            )}
+          </span>
+          <span className={`font-mono text-[0.6rem] tracking-[0.14em] uppercase ${STATE_TONE[s]}`}>
+            {STATE_WORD[s]}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -60,75 +116,79 @@ export interface UnderstandingMapProps {
   conceptTitle: string;
   claims: Claim[];
   focusClaimId: string | null;
-  /** "full" = centered horizontal members (standalone). "rail" = compact vertical list for the sticky side pane. */
+  /** "full" = larger standalone. "rail" = compact for the sticky side pane. */
   variant?: "full" | "rail";
 }
 
 /**
- * The signature visual: the concept as the load, its claims as the load-bearing
- * members. The focus claim is drawn forward by weight while the rest recede —
- * no boxes, no pills, no colour doing the work alone.
+ * The signature: understanding as a single beam descending through the strata of
+ * an explanation. Each claim is one stratum; the beam threads them top to bottom;
+ * its state at each crossing — clean, porous, fractured, or unreached — is what
+ * the explanation is actually carrying. Reducer-driven and read-only.
  */
 export function UnderstandingMap({
   conceptTitle,
   claims,
   focusClaimId,
-  variant = "full",
+  variant = "rail",
 }: UnderstandingMapProps) {
-  const rail = variant === "rail";
+  const full = variant === "full";
 
   return (
-    <section aria-label="Understanding map" className={rail ? "w-full" : "w-full max-w-3xl"}>
-      <header className={rail ? "mb-7" : "mb-12 text-center"}>
-        <h2
-          className={
-            rail
-              ? "font-heading text-xl font-bold tracking-tight text-ink"
-              : "font-heading text-3xl font-bold tracking-tight text-ink sm:text-4xl"
-          }
-        >
+    <section aria-label="Understanding map" className={full ? "w-full max-w-md" : "w-full"}>
+      <header className="mb-8">
+        <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
+          Understanding map
+        </p>
+        <h2 className={`mt-3 font-serif tracking-tight text-ivory ${full ? "text-3xl" : "text-2xl"}`}>
           {conceptTitle}
         </h2>
-        <p className={rail ? "mt-1 text-xs text-ink-soft" : "mt-2 text-sm text-ink-soft"}>
-          What your explanation is carrying.
+        <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-ink">
+          What a strong explanation must carry — and how yours holds.
         </p>
       </header>
 
-      <ol
-        className={
-          rail
-            ? "flex list-none flex-col gap-6 p-0"
-            : "flex list-none flex-wrap items-start justify-center gap-x-10 gap-y-10 p-0"
-        }
-      >
+      <ol className="relative m-0 flex list-none flex-col gap-7 p-0">
+        {/* the beam: a single hairline the strata cross */}
+        {claims.length > 0 && (
+          <span
+            aria-hidden="true"
+            className="absolute top-2 bottom-2 left-[calc(0.4375rem)] w-px bg-line-strong"
+          />
+        )}
+
         {claims.map((claim) => {
           const focused = claim.id === focusClaimId;
           return (
-            <li
-              key={claim.id}
-              className={
-                rail
-                  ? "flex flex-col items-start text-left"
-                  : "flex w-40 flex-col items-center text-center"
-              }
-            >
-              <span
-                className={`text-[0.95rem] leading-snug ${rail ? "" : "grid min-h-[3.6em] content-end"} ${
-                  focused ? "font-bold text-ink" : "font-medium text-ink-soft"
-                }`}
-              >
-                {claim.shortLabel}
+            <li key={claim.id} className="grid grid-cols-[0.875rem_1fr] items-start gap-x-4">
+              <span className="flex justify-center pt-0.5">
+                <BeamNode state={claim.state} focused={focused} />
               </span>
-              <div className="my-2.5">
-                <LoadPath state={claim.state} />
+              <div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <span
+                    className={`text-[0.95rem] leading-snug ${
+                      focused ? "font-medium text-ivory" : "text-ivory-dim"
+                    }`}
+                  >
+                    {claim.shortLabel}
+                  </span>
+                  <span
+                    className={`shrink-0 font-mono text-[0.6rem] tracking-[0.12em] uppercase ${STATE_TONE[claim.state]}`}
+                  >
+                    {STATE_WORD[claim.state]}
+                  </span>
+                </div>
+                <div className="mt-2.5">
+                  <Stratum state={claim.state} />
+                </div>
               </div>
-              <span className={`text-xs font-medium ${STATE_COLOR[claim.state]}`}>
-                {STATE_WORD[claim.state]}
-              </span>
             </li>
           );
         })}
       </ol>
+
+      {claims.length > 0 && <Legend />}
     </section>
   );
 }

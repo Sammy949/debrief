@@ -1,24 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { loadDraft, saveDraft } from "@/lib/session-store";
 
 /** The learner's single response input, reused across explanation / probe / repair.
  *  Styled as a technical drafting surface: a filename header, a sharp bordered field
- *  that turns Focus Amber when active, monospace body. */
+ *  that turns Focus Amber when active, monospace body. If given a draftKey, the
+ *  unsent text is autosaved and restored on reload (the runner clears it on a good turn). */
 export function ResponseField({
   placeholder = "Your own words are fine — take your time.",
   submitLabel = "Submit",
   filename = "~/response.md",
+  draftKey,
   onSubmit,
 }: {
   placeholder?: string;
   submitLabel?: string;
   filename?: string;
+  draftKey?: string;
   onSubmit: (text: string) => void;
 }) {
   const [text, setText] = useState("");
   const ready = text.trim().length > 0;
+
+  // Restore any autosaved draft after mount (browser-only, hydration-safe).
+  useEffect(() => {
+    if (draftKey) {
+      const saved = loadDraft(draftKey);
+      if (saved) setText(saved);
+    }
+  }, [draftKey]);
+
+  function update(next: string) {
+    setText(next);
+    if (draftKey) saveDraft(draftKey, next);
+  }
 
   return (
     <form
@@ -37,7 +54,7 @@ export function ResponseField({
         </div>
         <textarea
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => update(e.target.value)}
           placeholder={placeholder}
           rows={7}
           className="w-full resize-y bg-transparent px-4 py-4 font-mono text-sm leading-relaxed text-ivory placeholder:text-ghost focus-visible:outline-none"
@@ -59,3 +76,4 @@ export function ResponseField({
     </form>
   );
 }
+

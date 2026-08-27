@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { startOpenDebrief } from "@/app/debrief/actions";
 import { DebriefRunner } from "@/components/debrief-runner";
 import { Thinking } from "@/components/thinking";
+import { clearDraft, draftKey, loadDraft, loadOpenSession, saveDraft } from "@/lib/session-store";
 import type { Lesson } from "@/core/types";
+
+const CONCEPT_KEY = draftKey("new", "concept");
 
 /** Open-concept entry: name a concept, Groq maps the claims, then run the debrief on it. */
 export function OpenDebrief() {
@@ -12,6 +15,17 @@ export function OpenDebrief() {
   const [concept, setConcept] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // On reload: resume an in-progress open session if there is one, otherwise
+  // restore the half-typed concept. Browser-only, so it runs after mount.
+  const hydrated = useRef(false);
+  useEffect(() => {
+    if (hydrated.current) return;
+    hydrated.current = true;
+    const saved = loadOpenSession();
+    if (saved) setLesson(saved.lesson);
+    else setConcept(loadDraft(CONCEPT_KEY));
+  }, []);
 
   if (lesson) return <DebriefRunner lesson={lesson} />;
 
@@ -22,13 +36,22 @@ export function OpenDebrief() {
     setError(null);
     try {
       const result = await startOpenDebrief(c);
-      if ("lesson" in result) setLesson(result.lesson);
-      else setError(result.error);
+      if ("lesson" in result) {
+        clearDraft(CONCEPT_KEY);
+        setLesson(result.lesson); // the runner persists this shell on mount, so a reload resumes it
+      } else {
+        setError(result.error);
+      }
     } catch {
       setError("Something went wrong. Try again.");
     } finally {
       setPending(false);
     }
+  }
+
+  function updateConcept(next: string) {
+    setConcept(next);
+    saveDraft(CONCEPT_KEY, next);
   }
 
   return (
@@ -54,7 +77,7 @@ export function OpenDebrief() {
         <input
           type="text"
           value={concept}
-          onChange={(e) => setConcept(e.target.value)}
+          onChange={(e) => updateConcept(e.target.value)}
           placeholder="e.g. how database indexes work"
           disabled={pending}
           className="w-full border border-line bg-surface px-4 py-3.5 font-mono text-sm text-ivory transition-colors placeholder:text-ghost focus-visible:border-amber focus-visible:outline-none disabled:opacity-60"

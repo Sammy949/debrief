@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { answerCurious, answerRepair, continueDebrief, submitExplanation, wrapUp } from "@/app/debrief/actions";
 import type { TurnContent, TurnResult } from "@/app/debrief/turn-types";
 import { ResponseField } from "@/components/response-field";
@@ -8,6 +8,12 @@ import { Thinking } from "@/components/thinking";
 import { UnderstandingMap } from "@/components/understanding-map";
 import { createInitialState } from "@/core/reducer";
 import type { ClaimState, Lesson, SessionState, Verdict } from "@/core/types";
+import {
+  clearDraft,
+  draftKey,
+  loadSession,
+  saveSession,
+} from "@/lib/session-store";
 
 const STATE_WORD: Record<ClaimState, string> = {
   solid: "solid",
@@ -65,7 +71,24 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function runTurn(action: () => Promise<TurnResult>) {
+  // Restore a saved session on reload (browser-only, so it runs after mount to
+  // stay hydration-safe). No save yet → persist the fresh session so this debrief
+  // can be resumed and its draft survives even before the first turn.
+  const hydrated = useRef(false);
+  useEffect(() => {
+    if (hydrated.current) return;
+    hydrated.current = true;
+    const saved = loadSession(initialLesson.slug);
+    if (saved) {
+      setLesson(saved.lesson);
+      setState(saved.state);
+      setContent(saved.content);
+    } else {
+      saveSession({ lesson: initialLesson, state: createInitialState(initialLesson), content: {} });
+    }
+  }, [initialLesson]);
+
+  async function runTurn(action: () => Promise<TurnResult>, clearDraftKey?: string) {
     setPending(true);
     setError(null);
     try {
@@ -73,7 +96,14 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
       if (result.lesson) setLesson(result.lesson);
       setState(result.state);
       setContent(result.content);
-      if (result.error) setError(result.error);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        // Persist only a good turn, and only then drop the sent draft — so a reload
+        // mid-request keeps both the session and the unsent text.
+        saveSession({ lesson: result.lesson ?? lesson, state: result.state, content: result.content });
+        if (clearDraftKey) clearDraft(clearDraftKey);
+      }
     } catch {
       setError("Something went wrong. Try again.");
     } finally {
@@ -82,14 +112,20 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
   }
 
   function restart() {
+    const fresh = createInitialState(initialLesson);
     setLesson(initialLesson);
-    setState(createInitialState(initialLesson));
+    setState(fresh);
     setContent({});
     setError(null);
+    saveSession({ lesson: initialLesson, state: fresh, content: {} });
+    for (const field of ["explanation", "curious", "repair"]) {
+      clearDraft(draftKey(initialLesson.slug, field));
+    }
   }
 
   // The input area: a thinking shimmer while a turn runs, else the field (+ any recoverable error).
   function inputArea(
+    field: string,
     thinkingLabel: string,
     submitLabel: string,
     onSubmit: (text: string) => void,
@@ -102,6 +138,7 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           <p className="mb-3 font-mono text-xs tracking-wide text-terracotta">{error}</p>
         )}
         <ResponseField
+          draftKey={draftKey(lesson.slug, field)}
           placeholder={opts?.placeholder}
           filename={opts?.filename}
           submitLabel={submitLabel}
@@ -124,9 +161,10 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           Your own words are perfect — don&apos;t overthink it.
         </p>
         {inputArea(
+          "explanation",
           "Reading what you wrote…",
           "Submit explanation",
-          (text) => runTurn(() => submitExplanation(lesson, state, text)),
+          (text) => runTurn(() => submitExplanation(lesson, state, text), draftKey(lesson.slug, "explanation")),
           {
             placeholder: "Start with what it is, and why it matters.",
             filename: "~/explanation.md",
@@ -164,9 +202,10 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           {content.curiousQuestion ?? probeFallback}
         </p>
         {inputArea(
+          "curious",
           "Working through your answer…",
           "Answer",
-          (text) => runTurn(() => answerCurious(lesson, state, text)),
+          (text) => runTurn(() => answerCurious(lesson, state, text), draftKey(lesson.slug, "curious")),
           { filename: "~/answer.md" },
         )}
       </>
@@ -206,9 +245,10 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
           {content.repairQuestion ?? lesson.fallbackRepairQuestion}
         </p>
         {inputArea(
+          "repair",
           "Seeing how that holds up…",
           "Try it",
-          (text) => runTurn(() => answerRepair(lesson, state, text)),
+          (text) => runTurn(() => answerRepair(lesson, state, text), draftKey(lesson.slug, "repair")),
           { filename: "~/repair.md" },
         )}
       </>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { Plus } from "@phosphor-icons/react/dist/ssr";
 import { answerCurious, answerRepair, continueDebrief, submitExplanation, wrapUp } from "@/app/debrief/actions";
 import type { TurnContent, TurnResult } from "@/app/debrief/turn-types";
 import { ResponseField } from "@/components/response-field";
@@ -62,7 +64,14 @@ function TwoPane({ left, map }: { left: ReactNode; map: ReactNode }) {
   );
 }
 
-export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
+export function DebriefRunner({
+  lesson: initialLesson,
+  onExit,
+}: {
+  lesson: Lesson;
+  /** Open path: reset back to the concept entry. Absent on authored runs (links to /debrief/new). */
+  onExit?: () => void;
+}) {
   // Lesson lives in state because the open path enriches it (claims decomposed from
   // the explanation) on the first turn; authored lessons simply never change it.
   const [lesson, setLesson] = useState<Lesson>(initialLesson);
@@ -148,10 +157,34 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
     );
   }
 
+  // A quiet "new debrief" escape. On the open path it resets to the concept entry;
+  // on authored runs it links to a fresh open concept (leaving this lesson saved).
+  function ExitControl({ wide }: { wide: boolean }) {
+    const cls =
+      "inline-flex items-center gap-1.5 font-mono text-[0.65rem] tracking-[0.16em] uppercase text-muted-ink transition-colors hover:text-amber";
+    return (
+      <div className={`mx-auto w-full px-6 pt-6 ${wide ? "max-w-6xl" : "max-w-2xl"}`}>
+        {onExit ? (
+          <button onClick={onExit} className={cls}>
+            <Plus weight="bold" className="size-3" />
+            New debrief
+          </button>
+        ) : (
+          <Link href="/debrief/new" className={cls}>
+            <Plus weight="bold" className="size-3" />
+            New debrief
+          </Link>
+        )}
+      </div>
+    );
+  }
+
   // Explanation: a single focused column; write cold, no map/claims revealed yet.
   if (state.stage === "explanation") {
     return (
-      <div className="mx-auto flex w-full max-w-2xl flex-col px-6 py-20">
+      <>
+        <ExitControl wide={false} />
+        <div className="mx-auto flex w-full max-w-2xl flex-col px-6 pt-10 pb-20">
         <Eyebrow>{lesson.title}</Eyebrow>
         <p className="mt-4 font-serif text-2xl leading-snug text-ivory">{lesson.objective}</p>
         <p className="mt-10 font-medium text-ivory">
@@ -170,7 +203,8 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
             filename: "~/explanation.md",
           },
         )}
-      </div>
+        </div>
+      </>
     );
   }
 
@@ -333,5 +367,10 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
     );
   }
 
-  return <TwoPane left={left} map={map} />;
+  return (
+    <>
+      <ExitControl wide />
+      <TwoPane left={left} map={map} />
+    </>
+  );
 }

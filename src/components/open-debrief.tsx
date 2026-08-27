@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { startOpenDebrief } from "@/app/debrief/actions";
 import { DebriefRunner } from "@/components/debrief-runner";
 import { Thinking } from "@/components/thinking";
-import { clearDraft, draftKey, loadDraft, loadOpenSession, saveDraft } from "@/lib/session-store";
+import { clearDraft, clearSession, draftKey, loadDraft, loadOpenSession, saveDraft } from "@/lib/session-store";
 import type { Lesson } from "@/core/types";
 
 const CONCEPT_KEY = draftKey("new", "concept");
@@ -27,7 +27,15 @@ export function OpenDebrief() {
     else setConcept(loadDraft(CONCEPT_KEY));
   }, []);
 
-  if (lesson) return <DebriefRunner lesson={lesson} />;
+  if (lesson) return <DebriefRunner lesson={lesson} onExit={newDebrief} />;
+
+  function newDebrief() {
+    if (lesson) clearSession(lesson.slug);
+    clearDraft(CONCEPT_KEY);
+    setLesson(null);
+    setConcept("");
+    setError(null);
+  }
 
   async function start() {
     const c = concept.trim();

@@ -39,9 +39,8 @@ export default function Home() {
               </h1>
 
               <p className="max-w-md text-lg leading-relaxed text-ivory-dim">
-                Pick something you think you understand and explain it in your own
-                words. Debrief finds the exact point where your explanation breaks,
-                then helps you repair it.
+                Explain something you think you understand. Debrief finds the
+                exact point it breaks, then helps you fix it.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">

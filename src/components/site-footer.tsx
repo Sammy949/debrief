@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const LINKS = [
-  { label: "Methodology", href: "/methodology" },
   { label: "Library", href: "/lessons" },
   { label: "About", href: "/about" },
+  { label: "Methodology", href: "/methodology" },
   { label: "Privacy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
 ];

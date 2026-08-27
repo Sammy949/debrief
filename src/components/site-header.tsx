@@ -7,9 +7,9 @@ import { Dialog } from "@base-ui/react/dialog";
 import { Brain, ArrowRight, List, X } from "@phosphor-icons/react/dist/ssr";
 
 const NAV = [
-  { label: "Methodology", href: "/methodology" },
   { label: "Library", href: "/lessons" },
   { label: "About", href: "/about" },
+  { label: "Methodology", href: "/methodology" },
 ];
 
 export function SiteHeader() {

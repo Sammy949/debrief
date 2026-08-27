@@ -15,6 +15,7 @@
 
   /* substrate — warm near-black stepped up by tone, never by shadow */
   --obsidian:      #100f0d;
+  --surface-lowest: #0b0a08;
   --surface:       #191713;
   --surface-high:  #23201a;
   --line:          #2c2924;
@@ -83,6 +84,7 @@
 
   /* brand utilities: bg-surface / text-ivory / text-amber / border-line ... */
   --color-obsidian: var(--obsidian);
+  --color-surface-lowest: var(--surface-lowest);
   --color-surface: var(--surface);
   --color-surface-high: var(--surface-high);
   --color-line: var(--line);
@@ -162,12 +164,35 @@
   animation: fracture-pulse 2.8s ease-in-out infinite;
 }
 
+/* Hero substrate: a fine structural grid that fades out toward the bottom edge,
+ * so it reads as a drafting canvas, not a full sheet of graph paper. */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, #1c1a16 1px, transparent 1px),
+    linear-gradient(to bottom, #1c1a16 1px, transparent 1px);
+  background-size: 34px 34px;
+  background-position: center top;
+}
+.gradient-mask-b {
+  -webkit-mask-image: linear-gradient(to bottom, #000 42%, transparent 96%);
+  mask-image: linear-gradient(to bottom, #000 42%, transparent 96%);
+}
+
+/* The teach-back card's decorative orbit — one slow, quiet rotation. */
+@keyframes orbit-slow {
+  to { transform: rotate(360deg); }
+}
+.orbit-slow {
+  animation: orbit-slow 60s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .beam-scan {
     animation: none;
     background-image: none;
   }
-  .beam-fracture {
+  .beam-fracture,
+  .orbit-slow {
     animation: none;
   }
   .shimmer {

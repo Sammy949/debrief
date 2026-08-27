@@ -1,166 +1,168 @@
 import Link from "next/link";
-import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
+import { Brain, MagnifyingGlass, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 
-const STAGES = [
-  { name: "Explain", copy: "Say it in your own words, from memory.", accent: false },
-  { name: "Probe", copy: "One curious question, aimed at the weakest point.", accent: false },
-  { name: "Reveal", copy: "The exact sentence where your reasoning stops holding.", accent: true },
-  { name: "Repair", copy: "A small correction, then you use it where it changed.", accent: false },
+const NAV = [
+  { label: "Methodology", href: "#methodology", active: true },
+  { label: "Library", href: "/lessons", active: false },
+  { label: "Pricing", href: "#pricing", active: false },
+  { label: "About", href: "#about", active: false },
 ];
 
-/**
- * The signature: a single beam of understanding descending through the strata of an
- * explanation. Solid strata pass it clean; the fractured one splits it (the amber break);
- * the faint stratum below is not yet reached. Static structure, one slow reduced-motion-safe
- * scan. Previews the live Understanding Map.
- */
-function SignatureBeam() {
-  const strata = [
-    { label: "premise", state: "solid" },
-    { label: "mechanism", state: "solid" },
-    { label: "the claim under load", state: "fracture" },
-    { label: "consequence", state: "faint" },
-  ] as const;
-
-  return (
-    <div
-      aria-hidden="true"
-      className="relative hidden select-none sm:block"
-      style={{ ["--beam-x" as string]: "1.5rem" }}
-    >
-      {/* the beam: a hairline that scans slowly, gated by reduced-motion */}
-      <span className="beam-scan absolute top-0 bottom-0 left-[var(--beam-x)] w-px -translate-x-1/2 bg-line-strong" />
-      <ul className="flex list-none flex-col gap-9 p-0">
-        {strata.map((s) => (
-          <li key={s.label} className="relative flex items-center gap-4">
-            {s.state === "fracture" ? (
-              <span className="relative left-[var(--beam-x)] flex -translate-x-1/2 items-center">
-                <span className="h-px w-6 -translate-y-[3px] bg-amber" />
-                <span className="h-px w-6 translate-y-[3px] bg-amber" />
-              </span>
-            ) : (
-              <span
-                className={`relative left-[var(--beam-x)] block h-px -translate-x-1/2 ${
-                  s.state === "faint" ? "w-10 bg-ghost" : "w-12 bg-ivory-dim"
-                }`}
-              />
-            )}
-            <span
-              className={`ml-6 font-mono text-[0.6rem] tracking-[0.18em] uppercase ${
-                s.state === "fracture"
-                  ? "text-amber"
-                  : s.state === "faint"
-                    ? "text-ghost"
-                    : "text-muted-ink"
-              }`}
-            >
-              {s.label}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+const FOOTER_LINKS = [
+  "Documentation",
+  "Privacy Policy",
+  "Terms of Service",
+  "API Reference",
+  "Status",
+];
 
 export default function Home() {
   return (
     <>
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-        <Link href="/" className="font-serif text-xl tracking-tight text-ivory">
-          Debrief
-        </Link>
-        <Link
-          href="/debrief/new"
-          className="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-muted-ink transition-colors hover:text-ivory"
-        >
-          Start a debrief
-        </Link>
+      {/* ---- top nav ---- */}
+      <header className="sticky top-0 z-50 border-b border-line bg-obsidian">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4">
+          <Link href="/" className="flex items-center gap-2.5">
+            <Brain weight="duotone" className="size-5 text-amber" />
+            <span className="font-serif text-2xl tracking-tight text-ivory">Debrief</span>
+          </Link>
+
+          <nav className="hidden items-center gap-8 md:flex">
+            {NAV.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={
+                  item.active
+                    ? "border-b border-ivory pb-1 text-sm text-ivory"
+                    : "pb-1 text-sm text-muted-ink transition-colors hover:text-ivory"
+                }
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <form
+              action="/lessons"
+              className="hidden items-center gap-2 border border-line px-3 py-1.5 transition-colors focus-within:border-amber md:flex"
+            >
+              <MagnifyingGlass className="size-4 text-muted-ink" aria-hidden="true" />
+              <input
+                name="q"
+                placeholder="Search…"
+                aria-label="Search the library"
+                className="w-28 bg-transparent text-sm text-ivory placeholder:text-muted-ink focus:outline-none"
+              />
+            </form>
+            <Link
+              href="/debrief/new"
+              className="inline-flex items-center gap-2 bg-ivory px-4 py-2 font-mono text-[0.7rem] font-medium tracking-[0.14em] uppercase text-obsidian transition-colors hover:bg-amber"
+            >
+              Get Started
+              <ArrowRight weight="bold" className="size-3.5" />
+            </Link>
+          </div>
+        </div>
       </header>
 
       <main className="flex flex-1 flex-col">
-        {/* ---- hero: editorial, marginalia beam on the left, one clear action ---- */}
-        <section className="flex min-h-[82vh] items-center border-b border-line">
-          <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-x-16 gap-y-12 px-6 py-24 lg:grid-cols-[14rem_minmax(0,1fr)]">
-            <SignatureBeam />
+        {/* ---- hero: editorial split over a fading drafting grid ---- */}
+        <section className="relative overflow-hidden border-b border-line bg-grid-pattern pt-28 pb-24 gradient-mask-b">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 md:grid-cols-12">
+            {/* left: the pitch */}
+            <div className="flex flex-col gap-8 md:col-span-7">
+              <div className="inline-flex w-fit items-center gap-2.5 border border-line bg-surface-lowest px-3 py-1.5">
+                <span className="size-1.5 bg-amber" aria-hidden="true" />
+                <span className="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-ivory-dim">
+                  The Teach-Back Method
+                </span>
+              </div>
 
-            <div className="max-w-[36rem]">
-              <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
-                The teach-back method
-              </p>
-
-              <h1 className="mt-6 font-serif text-[clamp(2.75rem,6vw,4.5rem)] leading-[1.05] tracking-[-0.01em] text-ivory">
-                Make your{" "}
-                <em className="italic text-amber">understanding</em> visible.
+              <h1 className="font-serif text-[clamp(2.75rem,6vw,4.25rem)] leading-[1.08] tracking-[-0.02em] text-ivory">
+                Make your <br />
+                <em className="italic text-amber">understanding</em> <br />
+                visible.
               </h1>
 
-              <p className="mt-8 max-w-[30rem] text-lg leading-relaxed text-ivory-dim">
-                Explain a concept in your own words. Debrief maps what
-                you&apos;re carrying, probes the weakest point, and shows you the
-                exact sentence where it stops holding.
+              <p className="max-w-xl text-lg leading-relaxed text-ivory-dim">
+                A strict, editorial environment for high-cognitive consolidation.
+                Articulate complex concepts, receive surgical feedback, and forge
+                robust mental models through the act of teaching.
               </p>
 
-              <div className="mt-10">
+              <div className="flex flex-wrap items-center gap-4">
                 <Link
                   href="/debrief/new"
-                  className="group inline-flex items-center gap-2.5 bg-ivory px-7 py-3.5 text-base font-medium text-obsidian transition-colors hover:bg-amber focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
+                  className="inline-flex items-center bg-ivory px-7 py-3 font-medium text-obsidian transition-colors hover:bg-amber focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
                 >
-                  Start a debrief
-                  <ArrowUpRight
-                    weight="bold"
-                    className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                  />
+                  Start a Session
                 </Link>
+                <Link
+                  href="#methodology"
+                  className="inline-flex items-center border border-line px-7 py-3 font-medium text-ivory transition-colors hover:bg-surface-high"
+                >
+                  Read the Manifesto
+                </Link>
+              </div>
+            </div>
+
+            {/* right: the teach-back prompt, as a session log */}
+            <div className="relative flex items-center justify-center md:col-span-5">
+              <span
+                aria-hidden="true"
+                className="orbit-slow pointer-events-none absolute -right-16 -bottom-16 size-64 rounded-full border border-dashed border-line opacity-25"
+              />
+              <div className="relative z-10 w-full max-w-md rotate-2 border border-line bg-surface-lowest p-4 shadow-[0_18px_44px_-26px_rgba(0,0,0,0.9)] transition-transform duration-500 hover:rotate-0">
+                <div className="mb-3 flex items-center justify-between border-b border-line pb-2.5">
+                  <span className="font-mono text-xs text-muted-ink">session_042.log</span>
+                  <div className="flex gap-1.5" aria-hidden="true">
+                    <span className="size-1.5 bg-line-strong" />
+                    <span className="size-1.5 bg-line-strong" />
+                    <span className="size-1.5 bg-line-strong" />
+                  </div>
+                </div>
+                <p className="mb-4 font-serif text-xl leading-snug text-ivory">
+                  Explain &lsquo;Quantum Entanglement&rsquo; as if to a fellow
+                  physicist.
+                </p>
+                <div className="border border-line bg-surface p-3">
+                  <p className="font-mono text-xs leading-relaxed text-muted-ink">
+                    &gt; It&apos;s a physical phenomenon that occurs when a group
+                    of particles are generated, interact, or share spatial
+                    proximity…
+                  </p>
+                  <div className="mt-3 h-px w-full animate-pulse bg-amber opacity-60" />
+                </div>
               </div>
             </div>
           </div>
         </section>
-
-        {/* ---- how it works: the loop, terse ---- */}
-        <section className="mx-auto w-full max-w-6xl px-6 py-24">
-          <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
-            The loop
-          </p>
-          <div className="mt-12 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-            {STAGES.map((s) => (
-              <div key={s.name}>
-                <span
-                  className={`block h-px w-full ${s.accent ? "bg-amber" : "bg-line-strong"}`}
-                  aria-hidden="true"
-                />
-                <h2
-                  className={`mt-5 font-serif text-2xl tracking-tight ${
-                    s.accent ? "text-amber" : "text-ivory"
-                  }`}
-                >
-                  {s.name}
-                </h2>
-                <p className="mt-3 text-[0.95rem] leading-relaxed text-ivory-dim">
-                  {s.copy}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ---- footer: the signature wordmark, anchored flush to the bottom edge ---- */}
-        <footer className="mt-auto border-t border-line">
-          <div className="mx-auto w-full max-w-6xl px-6 pt-16">
-            <p className="max-w-md font-serif text-xl leading-snug text-ivory-dim">
-              Don&apos;t just learn it.{" "}
-              <span className="text-ivory">Debrief it.</span>
-            </p>
-          </div>
-          <div className="mt-12 overflow-hidden">
-            <p
-              className="mx-auto max-w-6xl translate-y-[0.12em] px-6 font-serif text-[clamp(4rem,19vw,16rem)] leading-none tracking-[-0.02em] text-surface-high"
-              aria-hidden="true"
-            >
-              Debrief
-            </p>
-          </div>
-        </footer>
       </main>
+
+      {/* ---- footer ---- */}
+      <footer className="mt-auto border-t border-line">
+        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-8 px-6 py-16 md:flex-row md:items-center">
+          <div className="flex flex-col gap-2">
+            <span className="font-serif text-2xl text-ivory">Debrief</span>
+            <span className="text-sm text-muted-ink">
+              © 2026 Debrief Technical Systems.
+            </span>
+          </div>
+          <nav className="flex flex-wrap gap-x-6 gap-y-3">
+            {FOOTER_LINKS.map((label) => (
+              <a
+                key={label}
+                href="#"
+                className="text-sm text-muted-ink underline decoration-1 underline-offset-4 transition-colors hover:text-ivory"
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </footer>
     </>
   );
 }

@@ -103,7 +103,7 @@ function openLessonShell(concept: string): Lesson {
   return {
     slug: slugify(title),
     title,
-    objective: `Explain ${title} clearly enough that its essential ideas hold up under one good question.`,
+    objective: `Explain ${title} in your own words — clearly enough that it holds up when someone asks about it.`,
     difficulty: "intermediate",
     mode: "open",
     claims: [],
@@ -111,10 +111,13 @@ function openLessonShell(concept: string): Lesson {
     counterexample: "",
     applicationScenarios: [],
     misconceptions: [],
-    fallbackWeaknessQuestion: "If the situation changed, would your explanation still hold, and why?",
-    fallbackUnaddressedQuestion: "Can you walk me through the part of this you didn't get to yet?",
-    fallbackVerificationQuestion: "Use this idea in a new, concrete situation and show what happens.",
-    fallbackRepairQuestion: "Use this idea in a new, concrete example and walk through what happens.",
+    fallbackWeaknessQuestion:
+      "Which part of that feels shakiest to you? Try explaining just that piece a little more.",
+    fallbackUnaddressedQuestion:
+      "There's a part of this you haven't touched on yet — can you walk me through it?",
+    fallbackVerificationQuestion:
+      "Where else does this show up? Pick a real example and tell me what happens.",
+    fallbackRepairQuestion: "Try it on a fresh example — what happens, and why?",
   };
 }
 

@@ -7,7 +7,7 @@ import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
  *  Styled as a technical drafting surface: a filename header, a sharp bordered field
  *  that turns Focus Amber when active, monospace body. */
 export function ResponseField({
-  placeholder = "Begin drafting your explanation…",
+  placeholder = "Your own words are fine — take your time.",
   submitLabel = "Submit",
   filename = "~/response.md",
   onSubmit,

@@ -273,8 +273,8 @@ export async function generateVerificationQuestion(
 ): Promise<CuriousQuestion> {
   const system = [
     "You are a curious reviewer in a teach-back tool. The learner explained every essential claim solidly, so this is a transfer check, not a correction.",
-    "Ask ONE short question that makes them APPLY the idea in a new, concrete situation to confirm the understanding holds.",
-    "It must be answerable in a sentence or two, must NOT restate a definition, and must NOT reveal the answer. Return only the question.",
+    "Point to a SPECIFIC, concrete example or scenario and ask what happens in it — so the learner has to use the idea, not restate it.",
+    "Sound like a curious person, not a rubric. NEVER use abstract phrasing like 'apply this in a new situation' or 'use this idea in a new context'; name an actual case instead. One or two sentences, answerable briefly, and don't reveal the answer. Return only the question.",
   ].join("\n");
 
   const user = `Concept: ${lesson.title}\nClaim to stress-test: ${focusClaim.claim}\nWhy it matters: ${focusClaim.whyItMatters}\n\nWhat the learner said:\n"""${learnerText}"""`;
@@ -359,7 +359,7 @@ export async function generateRepairQuestion(
 ): Promise<RepairQuestion> {
   const system = [
     "Ask ONE question that forces the learner to USE the repaired idea in a new situation (type 'apply'), or to explain WHY it works (type 'why').",
-    "Prefer 'apply' when the concept has a concrete application. Short, answerable in a few sentences, and it must require using the correction — not restating a definition.",
+    "Prefer 'apply' when the concept has a concrete application. Ground it in a SPECIFIC example — name the case rather than saying 'a new situation' abstractly. Warm, plain, human phrasing, answerable in a few sentences, and it must require using the correction, not restating a definition.",
   ].join("\n");
 
   const scenario = lesson.applicationScenarios[0] ?? "";

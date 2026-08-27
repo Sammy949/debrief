@@ -66,7 +66,7 @@ const LOOP = [
     n: "01",
     name: "Explain",
     accent: false,
-    body: "You write the idea from memory, in your own words. Retrieval practice — no notes, no multiple choice. The act of producing it is where the learning starts.",
+    body: "You write the idea from memory, in your own words. Retrieval practice: no notes, no multiple choice. The act of producing it is where the learning starts.",
   },
   {
     n: "02",
@@ -78,7 +78,7 @@ const LOOP = [
     n: "03",
     name: "Reveal",
     accent: true,
-    body: "It shows the exact sentence where your reasoning stops holding, with a short, just-in-time correction — the fracture, made visible.",
+    body: "It shows the exact sentence where your reasoning stops holding, with a short, just-in-time correction. The fracture, made visible.",
   },
   {
     n: "04",
@@ -90,7 +90,7 @@ const LOOP = [
 
 const STATES = [
   { word: "solid", tone: "text-ivory-dim", body: "Clearly and correctly explained. The stratum is dense; the beam passes clean." },
-  { word: "unclear", tone: "text-muted-ink", body: "Mentioned, but vague or partial. The band is porous — the light diffuses." },
+  { word: "unclear", tone: "text-muted-ink", body: "Mentioned, but vague or partial. The band is porous, and the light diffuses." },
   { word: "needs attention", tone: "text-amber", body: "The explanation contradicts the claim. The beam refracts: the amber fracture." },
   { word: "not reached", tone: "text-ghost", body: "Never addressed. A faint, dotted trace the beam hasn't arrived at yet." },
 ] as const;
@@ -183,7 +183,7 @@ export default function MethodologyPage() {
                   Every concept decomposes into the claims a complete explanation
                   must carry. Each claim is a stratum; a single beam threads them
                   top to bottom. Its state at each crossing is what your
-                  explanation is actually holding — clean, porous, fractured, or
+                  explanation is actually holding: clean, porous, fractured, or
                   not yet reached.
                 </p>
                 <p>
@@ -242,7 +242,7 @@ export default function MethodologyPage() {
                   Each turn runs a narrow model call, validates the response
                   against a strict schema, then hands the result to a pure state
                   machine that owns every transition. The model never drives the
-                  session directly — it only supplies judgments the reducer chooses
+                  session directly. It only supplies judgments the reducer chooses
                   to act on.
                 </p>
                 <p>

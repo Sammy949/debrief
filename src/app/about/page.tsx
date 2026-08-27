@@ -20,13 +20,13 @@ const PRINCIPLES = [
   {
     n: "02",
     title: "Diagnose, then teach",
-    body: "A grade tells you nothing you can act on. Debrief finds the one sentence where your reasoning breaks, then teaches to that exact point — not the whole topic.",
+    body: "A grade tells you nothing you can act on. Debrief finds the one sentence where your reasoning breaks, then teaches to that exact point, not the whole topic.",
     kind: "fracture",
   },
   {
     n: "03",
     title: "Understanding is a thing you watch move",
-    body: "Every claim your explanation carries has a state. As you answer, you watch it shift from unclear to solid — progress you can see, not a score you're handed.",
+    body: "Every claim your explanation carries has a state. As you answer, you watch it shift from unclear to solid. Progress you can see, not a score you're handed.",
     kind: "beam",
   },
 ] as const;
@@ -114,10 +114,10 @@ export default function AboutPage() {
               <em className="italic text-amber">survives a question.</em>
             </h1>
             <p className="mt-8 max-w-xl text-lg leading-relaxed text-ivory-dim">
-              Debrief is a teach-back tool. Rather than grade you, it listens like
-              a sharp, curious friend: you explain something out loud, and it finds
-              the one place your understanding quietly gives way — then helps you
-              shore it up.
+              Debrief is a teach-back tool. Instead of grading you, it acts like
+              a sharp, curious friend: you explain something out loud, and it
+              finds the one spot where your understanding gives way. Then it helps
+              you fix it.
             </p>
           </div>
         </section>
@@ -135,8 +135,8 @@ export default function AboutPage() {
               <p>
                 Decades of research on retrieval practice and generative learning
                 point the same way: you learn by pulling an idea out of your own
-                head and putting it into words, then checking it against reality —
-                not by reading it one more time.
+                head and putting it into words, then checking it against reality.
+                Not by reading it one more time.
               </p>
               <p>
                 Debrief is built as that loop. It asks you to explain from memory,
@@ -178,7 +178,7 @@ export default function AboutPage() {
           <div className="mx-auto w-full max-w-4xl px-6 py-28">
             <p className="font-serif text-[clamp(1.75rem,3.5vw,2.75rem)] leading-[1.2] tracking-tight text-ivory-dim">
               Most tools tell you whether you were right. Debrief shows you{" "}
-              <span className="text-ivory">where you stopped being sure</span> — and
+              <span className="text-ivory">where you stopped being sure</span>, and
               stays with you until the explanation holds.
             </p>
           </div>

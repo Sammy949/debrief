@@ -20,7 +20,7 @@ export default function PrivacyPage() {
               When you explain a concept, your text is sent to our AI provider
               (Groq) to be evaluated so Debrief can map your understanding and
               respond. Your explanations are used to generate that feedback in
-              the moment — not to advertise to you or to build a profile.
+              the moment, not to advertise to you or to build a profile.
             </p>
           ),
         },

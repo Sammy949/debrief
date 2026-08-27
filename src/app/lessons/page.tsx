@@ -7,7 +7,7 @@ import { LESSONS } from "@/core/fixtures";
 
 export const metadata: Metadata = {
   title: "Library · Debrief",
-  description: "Curated debriefs to start from — or bring your own concept.",
+  description: "Curated debriefs to start from, or bring your own concept.",
 };
 
 export default function LessonsPage() {

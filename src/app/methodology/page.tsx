@@ -201,6 +201,7 @@ export default function MethodologyPage() {
                 conceptTitle="Closures"
                 claims={SAMPLE_CLAIMS}
                 focusClaimId="c2"
+                showHelp={false}
               />
             </div>
           </div>

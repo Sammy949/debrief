@@ -119,6 +119,8 @@ export interface UnderstandingMapProps {
   focusClaimId: string | null;
   /** "full" = larger standalone. "rail" = compact for the sticky side pane. */
   variant?: "full" | "rail";
+  /** Render the floating "?" explainer (on in the live workbench, off where the map is a sample). */
+  showHelp?: boolean;
 }
 
 /**
@@ -132,23 +134,21 @@ export function UnderstandingMap({
   claims,
   focusClaimId,
   variant = "rail",
+  showHelp = true,
 }: UnderstandingMapProps) {
   const full = variant === "full";
 
   return (
     <section aria-label="Understanding map" className={full ? "w-full max-w-md" : "w-full"}>
       <header className="mb-8">
-        <div className="flex items-center justify-between gap-3">
-          <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
-            Understanding map
-          </p>
-          <MapHelp />
-        </div>
+        <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
+          Understanding map
+        </p>
         <h2 className={`mt-3 font-serif tracking-tight text-ivory ${full ? "text-3xl" : "text-2xl"}`}>
           {conceptTitle}
         </h2>
         <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-ink">
-          What a strong explanation must carry — and how yours holds.
+          What a strong explanation must carry, and how yours holds.
         </p>
       </header>
 
@@ -199,6 +199,8 @@ export function UnderstandingMap({
           <Legend />
         </>
       )}
+
+      {showHelp && <MapHelp />}
     </section>
   );
 }

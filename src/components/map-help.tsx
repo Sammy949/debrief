@@ -40,13 +40,13 @@ export function MapHelp() {
     <Popover.Root>
       <Popover.Trigger
         aria-label="What does this map mean?"
-        className="flex size-5 items-center justify-center border border-line font-mono text-[0.65rem] text-muted-ink transition-colors hover:border-amber hover:text-amber data-[popup-open]:border-amber data-[popup-open]:text-amber"
+        className="fixed right-6 bottom-6 z-40 flex size-11 items-center justify-center border border-line-strong bg-surface-high font-mono text-lg text-ivory-dim shadow-[0_10px_30px_-16px_rgba(0,0,0,0.9)] transition-colors hover:border-amber hover:text-amber data-[popup-open]:border-amber data-[popup-open]:text-amber"
       >
         ?
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="bottom" align="end" sideOffset={8}>
-          <Popover.Popup className="w-72 border border-line-strong bg-surface-high p-5 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.9)] transition-[opacity,transform] duration-150 data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0 data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0">
+        <Popover.Positioner side="top" align="end" sideOffset={10}>
+          <Popover.Popup className="mr-6 w-72 border border-line-strong bg-surface-high p-5 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.9)] transition-[opacity,transform] duration-150 data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0 data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0">
             <Popover.Title className="font-mono text-[0.65rem] tracking-[0.18em] uppercase text-muted-ink">
               Reading the map
             </Popover.Title>

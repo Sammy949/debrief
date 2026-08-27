@@ -64,8 +64,11 @@ export function SiteHeader() {
 
           <Dialog.Portal>
             <Dialog.Backdrop className="fixed inset-0 z-50 bg-obsidian/80 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-            <Dialog.Popup className="fixed inset-y-0 right-0 z-50 flex w-[82%] max-w-xs flex-col border-l border-line bg-surface transition-transform duration-300 ease-out data-[ending-style]:translate-x-full data-[starting-style]:translate-x-full">
-              <div className="flex items-center justify-between border-b border-line px-6 py-4">
+            <Dialog.Popup className="fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col border-t border-line bg-surface transition-transform duration-300 ease-out data-[ending-style]:translate-y-full data-[starting-style]:translate-y-full">
+              <div className="flex justify-center pt-3 pb-1">
+                <span className="h-1 w-10 bg-line-strong" aria-hidden="true" />
+              </div>
+              <div className="flex items-center justify-between px-6 py-3">
                 <Dialog.Title className="font-serif text-xl tracking-tight text-ivory">
                   Debrief
                 </Dialog.Title>
@@ -77,14 +80,14 @@ export function SiteHeader() {
                 </Dialog.Close>
               </div>
 
-              <nav className="flex flex-col px-6 py-4">
+              <nav className="flex flex-col px-6">
                 {NAV.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
                     onClick={() => setOpen(false)}
                     aria-current={isActive(item.href) ? "page" : undefined}
-                    className={`border-b border-line py-4 font-serif text-2xl tracking-tight transition-colors ${
+                    className={`border-t border-line py-4 font-serif text-2xl tracking-tight transition-colors ${
                       isActive(item.href) ? "text-amber" : "text-ivory hover:text-amber"
                     }`}
                   >
@@ -93,7 +96,7 @@ export function SiteHeader() {
                 ))}
               </nav>
 
-              <div className="mt-auto p-6">
+              <div className="p-6">
                 <Link
                   href="/debrief/new"
                   onClick={() => setOpen(false)}

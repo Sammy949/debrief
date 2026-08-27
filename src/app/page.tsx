@@ -53,8 +53,13 @@ export default function Home() {
 
       <main className="flex flex-1 flex-col">
         {/* ---- hero: editorial split over a fading drafting grid ---- */}
-        <section className="relative overflow-hidden border-b border-line bg-grid-pattern pt-28 pb-24 gradient-mask-b">
-          <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-12 gap-y-16 px-6 md:grid-cols-12">
+        <section className="relative overflow-hidden border-b border-line pt-28 pb-24">
+          {/* background grid on its own layer, faded downward — content stays at full opacity */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-grid-pattern gradient-mask-b"
+          />
+          <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-12 gap-y-16 px-6 md:grid-cols-12">
             {/* left: the pitch */}
             <div className="flex flex-col gap-8 md:col-span-6">
               <div className="inline-flex w-fit items-center gap-2.5 border border-line bg-surface-lowest px-3 py-1.5">
@@ -110,7 +115,7 @@ export default function Home() {
             </span>
           </div>
           <div className="flex flex-col gap-3 md:items-end">
-            <nav className="flex flex-wrap gap-x-6 gap-y-2">
+            <nav className="flex flex-wrap gap-x-6 gap-y-2 md:justify-end">
               <Link href="/lessons" className="text-sm text-muted-ink transition-colors hover:text-ivory">
                 Library
               </Link>
@@ -119,6 +124,12 @@ export default function Home() {
               </Link>
               <Link href="#about" className="text-sm text-muted-ink transition-colors hover:text-ivory">
                 About
+              </Link>
+              <Link href="/privacy" className="text-sm text-muted-ink transition-colors hover:text-ivory">
+                Privacy
+              </Link>
+              <Link href="/terms" className="text-sm text-muted-ink transition-colors hover:text-ivory">
+                Terms
               </Link>
             </nav>
             <span className="font-mono text-[0.7rem] tracking-wide text-ghost">

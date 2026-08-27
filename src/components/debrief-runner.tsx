@@ -33,24 +33,30 @@ const VERDICT: Record<Verdict, { title: string; line: string; next: string }> = 
   },
 };
 
+/** The technical label voice: Geist mono, tracked, upper. */
 function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="text-sm font-medium text-ink-soft">{children}</p>;
+  return (
+    <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
+      {children}
+    </p>
+  );
 }
 
 function Thinking({ label }: { label: string }) {
   return (
-    <p className="shimmer text-sm font-medium text-ink-soft" aria-live="polite">
+    <p className="shimmer font-mono text-[0.7rem] tracking-[0.16em] uppercase" aria-live="polite">
       {label}
     </p>
   );
 }
 
-/** Two-pane workbench: flow on the left, sticky map on the right. Stacks (map on top) on mobile. */
+/** Two-pane workbench: flow on the left, sticky map on the right, ruled between.
+ *  Stacks (map on top) on mobile. */
 function TwoPane({ left, map }: { left: ReactNode; map: ReactNode }) {
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-x-14 gap-y-12 px-6 py-16 lg:grid-cols-[minmax(0,1fr)_27rem]">
+    <div className="mx-auto grid w-full max-w-6xl gap-x-14 gap-y-12 px-6 py-16 lg:grid-cols-[minmax(0,1fr)_26rem]">
       <div className="order-2 max-w-2xl lg:order-1">{left}</div>
-      <div className="order-1 lg:order-2">
+      <div className="order-1 lg:order-2 lg:border-l lg:border-line lg:pl-14">
         <div className="lg:sticky lg:top-16">{map}</div>
       </div>
     </div>
@@ -90,12 +96,24 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
   }
 
   // The input area: a thinking shimmer while a turn runs, else the field (+ any recoverable error).
-  function inputArea(thinkingLabel: string, submitLabel: string, onSubmit: (text: string) => void, placeholder?: string) {
+  function inputArea(
+    thinkingLabel: string,
+    submitLabel: string,
+    onSubmit: (text: string) => void,
+    opts?: { placeholder?: string; filename?: string },
+  ) {
     if (pending) return <Thinking label={thinkingLabel} />;
     return (
       <>
-        {error && <p className="mb-3 text-sm font-medium text-sienna-deep">{error}</p>}
-        <ResponseField placeholder={placeholder} submitLabel={submitLabel} onSubmit={onSubmit} />
+        {error && (
+          <p className="mb-3 font-mono text-xs tracking-wide text-terracotta">{error}</p>
+        )}
+        <ResponseField
+          placeholder={opts?.placeholder}
+          filename={opts?.filename}
+          submitLabel={submitLabel}
+          onSubmit={onSubmit}
+        />
       </>
     );
   }
@@ -105,18 +123,21 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
     return (
       <div className="mx-auto flex w-full max-w-2xl flex-col px-6 py-20">
         <Eyebrow>{lesson.title}</Eyebrow>
-        <p className="mt-2 text-lg leading-relaxed text-ink">{lesson.objective}</p>
-        <p className="mt-8 font-medium text-ink">
+        <p className="mt-4 font-serif text-2xl leading-snug text-ivory">{lesson.objective}</p>
+        <p className="mt-10 font-medium text-ivory">
           Explain it as if you were teaching someone curious but new to it.
         </p>
-        <p className="mt-1 mb-4 text-sm text-ink-soft">
+        <p className="mt-1 mb-5 text-sm text-muted-ink">
           Use your own words. You don&apos;t need to be perfect.
         </p>
         {inputArea(
           "Reading your explanation…",
           "Submit explanation",
           (text) => runTurn(() => submitExplanation(lesson, state, text)),
-          "Start with what it is, and why it matters.",
+          {
+            placeholder: "Start with what it is, and why it matters.",
+            filename: "~/explanation.md",
+          },
         )}
       </div>
     );
@@ -146,11 +167,14 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
     left = (
       <>
         <Eyebrow>a curious question</Eyebrow>
-        <p className="mt-2 mb-5 text-lg font-medium leading-relaxed text-ink">
+        <p className="mt-4 mb-6 font-serif text-2xl leading-snug text-ivory">
           {content.curiousQuestion ?? probeFallback}
         </p>
-        {inputArea("Considering your answer…", "Answer", (text) =>
-          runTurn(() => answerCurious(lesson, state, text)),
+        {inputArea(
+          "Considering your answer…",
+          "Answer",
+          (text) => runTurn(() => answerCurious(lesson, state, text)),
+          { filename: "~/answer.md" },
         )}
       </>
     );
@@ -159,33 +183,40 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
     left = (
       <>
         {focusEval?.evidenceQuote && (
-          <div className="mb-8">
-            <p className="text-sm font-medium text-sienna-deep">where the explanation stops holding</p>
-            <blockquote className="mt-2 border-l-2 border-sienna pl-4 text-lg leading-relaxed text-ink">
+          <div className="mb-10">
+            <Eyebrow>
+              <span className="text-amber">where the explanation stops holding</span>
+            </Eyebrow>
+            <blockquote className="mt-3 border-l-2 border-amber pl-5 font-serif text-xl leading-relaxed text-ivory italic">
               {focusEval.evidenceQuote}
             </blockquote>
           </div>
         )}
 
         {intervention && (
-          <div className="mb-8">
+          <div className="mb-10">
             <Eyebrow>the distinction</Eyebrow>
-            <p className="mt-2 text-lg leading-relaxed text-ink">{intervention.distinction}</p>
+            <p className="mt-3 font-serif text-xl leading-relaxed text-ivory">
+              {intervention.distinction}
+            </p>
             {intervention.example && (
-              <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">{intervention.example}</p>
+              <p className="mt-4 text-[0.95rem] leading-relaxed text-ivory-dim">
+                {intervention.example}
+              </p>
             )}
-            {intervention.takeaway && (
-              <p className="mt-4 text-ink">{intervention.takeaway}</p>
-            )}
+            {intervention.takeaway && <p className="mt-4 text-ivory">{intervention.takeaway}</p>}
           </div>
         )}
 
         <Eyebrow>try it</Eyebrow>
-        <p className="mt-2 mb-5 text-lg font-medium leading-relaxed text-ink">
+        <p className="mt-4 mb-6 font-serif text-2xl leading-snug text-ivory">
           {content.repairQuestion ?? lesson.fallbackRepairQuestion}
         </p>
-        {inputArea("Checking your repair…", "Try it", (text) =>
-          runTurn(() => answerRepair(lesson, state, text)),
+        {inputArea(
+          "Checking your repair…",
+          "Try it",
+          (text) => runTurn(() => answerRepair(lesson, state, text)),
+          { filename: "~/repair.md" },
         )}
       </>
     );
@@ -201,26 +232,28 @@ export function DebriefRunner({ lesson: initialLesson }: { lesson: Lesson }) {
       <>
         {verdict && (
           <>
-            <h2 className="font-heading text-2xl font-bold tracking-tight text-ink">{verdict.title}</h2>
-            <p className="mt-2 text-lg leading-relaxed text-ink-soft">{verdict.line}</p>
+            <h2 className="font-serif text-3xl tracking-tight text-ivory">{verdict.title}</h2>
+            <p className="mt-3 text-lg leading-relaxed text-ivory-dim">{verdict.line}</p>
           </>
         )}
 
         {focusClaim && from && to && from !== to && (
-          <p className="mt-6 text-sm text-ink-soft">
+          <p className="mt-8 font-mono text-xs tracking-wide text-muted-ink">
             {focusClaim.shortLabel}:{" "}
-            <span className="font-medium text-ink">
+            <span className="text-amber">
               {STATE_WORD[from]} &rarr; {STATE_WORD[to]}
             </span>
           </p>
         )}
 
-        <p className="mt-8 text-sm font-medium text-ink-soft">what to do next</p>
-        <p className="mt-1 text-ink">{verdict?.next}</p>
+        <div className="mt-10">
+          <Eyebrow>what to do next</Eyebrow>
+          <p className="mt-3 text-ivory">{verdict?.next}</p>
+        </div>
 
         <button
           onClick={restart}
-          className="mt-10 rounded-md border border-paper-deep px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-paper-deep"
+          className="mt-12 border border-line px-6 py-3 font-mono text-[0.7rem] font-medium tracking-[0.16em] uppercase text-ivory transition-colors hover:border-amber hover:text-amber"
         >
           Start over
         </button>

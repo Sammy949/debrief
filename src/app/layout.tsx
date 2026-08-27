@@ -1,15 +1,32 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
-const satoshi = localFont({
+// The concept voice — a distinctive editorial serif (self-hosted, Fontshare Sentient).
+// Used for headlines, questions, and quotes. Variable, so weight is a range.
+const sentient = localFont({
   src: [
-    { path: "./fonts/Satoshi-Variable.woff2", weight: "300 900", style: "normal" },
-    { path: "./fonts/Satoshi-VariableItalic.woff2", weight: "300 900", style: "italic" },
+    { path: "./fonts/Sentient-Variable.woff2", weight: "200 800", style: "normal" },
+    { path: "./fonts/Sentient-VariableItalic.woff2", weight: "200 800", style: "italic" },
   ],
-  variable: "--font-satoshi",
+  variable: "--font-serif",
   display: "swap",
-  fallback: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+  fallback: ["Iowan Old Style", "Palatino", "Georgia", "serif"],
+});
+
+// The interface voice — body, labels, inputs.
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+// Technical data — the terminal-style response field, code, filenames.
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +37,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${satoshi.variable} antialiased`}>
+    <html
+      lang="en"
+      className={`${sentient.variable} ${geist.variable} ${geistMono.variable} antialiased`}
+    >
       <body>
         <div className="flex min-h-screen flex-col">{children}</div>
       </body>

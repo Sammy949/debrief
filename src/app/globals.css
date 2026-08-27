@@ -4,41 +4,61 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ------------------------- World A — warm drafting table ------------------------- *
- * Ink on warm paper, one tonal sienna accent. No traffic-light colour, no glow.
- * Tokens forged in design/map-study.html.
- * -------------------------------------------------------------------------------- */
+/* ------------------------- Editorial Technical — dark drafting studio ------------------------- *
+ * Ink-on-obsidian, warm charcoal surfaces, one Focus Amber accent + a rare Clarity Blue for
+ * technical metadata. Sharp corners, 1px structural lines, no shadow / blur / glow. A high-end
+ * broadsheet redrawn for a developer's terminal. Full spec:
+ * notes/stitch_debrief_visual_systems_for_understanding/debrief/DESIGN.md
+ * --------------------------------------------------------------------------------------------- */
 :root {
-  --paper:        #f1ede3;
-  --paper-deep:   #e7e1d2;
-  --ink:          #1b1712;
-  --ink-soft:     #6e6656;
-  --ink-untested: #7a7061;
-  --ink-ghost:    #948a76;
-  --sienna:       #9a5a2c;
-  --sienna-deep:  #6f3d1b;
+  color-scheme: dark;
 
-  /* shadcn semantic tokens mapped onto World A */
-  --background: var(--paper);
-  --foreground: var(--ink);
-  --card: var(--paper);
-  --card-foreground: var(--ink);
-  --popover: var(--paper);
-  --popover-foreground: var(--ink);
-  --primary: var(--ink);
-  --primary-foreground: var(--paper);
-  --secondary: var(--paper-deep);
-  --secondary-foreground: var(--ink);
-  --muted: var(--paper-deep);
-  --muted-foreground: var(--ink-soft);
-  --accent: var(--paper-deep);
-  --accent-foreground: var(--sienna-deep);
-  --destructive: var(--sienna-deep);
-  --border: var(--paper-deep);
-  --input: var(--paper-deep);
-  --ring: var(--sienna);
+  /* substrate — warm near-black stepped up by tone, never by shadow */
+  --obsidian:      #100f0d;
+  --surface:       #191713;
+  --surface-high:  #23201a;
+  --line:          #2c2924;
+  --line-strong:   #3c3831;
 
-  --radius: 0.5rem;
+  /* ink — warm soft ivory down to faint ghost */
+  --ivory:         #ece7dc;
+  --ivory-dim:     #b4aea0;
+  --muted-ink:     #837c6d;
+  --ghost:         #565046;
+
+  /* Focus Amber — primary action, active state, the fracture/attention signal */
+  --amber:         #e6c87a;
+  --amber-soft:    #ecd8a1;
+  --amber-deep:    #b99a4e;
+
+  /* Clarity Blue — technical metadata, code, system feedback only (used sparingly) */
+  --blue:          #7ba0e8;
+
+  /* muted ochre for genuine error — never an aggressive red */
+  --terracotta:    #c77b54;
+
+  /* shadcn semantic tokens mapped onto Editorial Technical */
+  --background: var(--obsidian);
+  --foreground: var(--ivory);
+  --card: var(--surface);
+  --card-foreground: var(--ivory);
+  --popover: var(--surface-high);
+  --popover-foreground: var(--ivory);
+  --primary: var(--ivory);
+  --primary-foreground: var(--obsidian);
+  --secondary: var(--surface-high);
+  --secondary-foreground: var(--ivory);
+  --muted: var(--surface);
+  --muted-foreground: var(--muted-ink);
+  --accent: var(--surface-high);
+  --accent-foreground: var(--amber);
+  --destructive: var(--terracotta);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--amber);
+
+  /* Strictly architectural — every corner sharp. */
+  --radius: 0rem;
 }
 
 @theme inline {
@@ -61,25 +81,31 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* brand utilities: bg-paper / text-ink / text-sienna / border-paper-deep ... */
-  --color-paper: var(--paper);
-  --color-paper-deep: var(--paper-deep);
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-ink-untested: var(--ink-untested);
-  --color-ink-ghost: var(--ink-ghost);
-  --color-sienna: var(--sienna);
-  --color-sienna-deep: var(--sienna-deep);
+  /* brand utilities: bg-surface / text-ivory / text-amber / border-line ... */
+  --color-obsidian: var(--obsidian);
+  --color-surface: var(--surface);
+  --color-surface-high: var(--surface-high);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ivory: var(--ivory);
+  --color-ivory-dim: var(--ivory-dim);
+  --color-muted-ink: var(--muted-ink);
+  --color-ghost: var(--ghost);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-amber-deep: var(--amber-deep);
+  --color-blue: var(--blue);
+  --color-terracotta: var(--terracotta);
 
-  --font-sans: var(--font-satoshi);
-  --font-heading: var(--font-satoshi);
-  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
 
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-sm: 0rem;
+  --radius-md: 0rem;
+  --radius-lg: 0rem;
+  --radius-xl: 0rem;
+  --radius-2xl: 0rem;
 }
 
 @layer base {
@@ -91,7 +117,66 @@
   }
 }
 
+/* The "thinking" state on the flow — a slow tonal sweep across the label. */
+@keyframes shimmer-sweep {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted-ink) 0%,
+    var(--ivory) 50%,
+    var(--muted-ink) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer-sweep 2.4s linear infinite;
+}
+
+/* The signature beam: a warm scan descending the hairline through the strata. */
+@keyframes beam-descend {
+  0% { background-position: 0 -110%; }
+  100% { background-position: 0 210%; }
+}
+.beam-scan {
+  background-image: linear-gradient(
+    to bottom,
+    transparent 42%,
+    var(--amber) 50%,
+    transparent 58%
+  );
+  background-size: 100% 320%;
+  background-repeat: no-repeat;
+  animation: beam-descend 5s ease-in-out infinite;
+}
+
+/* The fracture: the amber break holds a slow pulse — the one live beat on the map. */
+@keyframes fracture-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.beam-fracture {
+  animation: fracture-pulse 2.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .beam-scan {
+    animation: none;
+    background-image: none;
+  }
+  .beam-fracture {
+    animation: none;
+  }
+  .shimmer {
+    animation: none;
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: var(--muted-ink);
+  }
   *,
   *::before,
   *::after {

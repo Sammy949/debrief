@@ -1,4 +1,5 @@
 import type { Claim, ClaimState } from "@/core/types";
+import { MapHelp } from "@/components/map-help";
 
 const STATE_WORD: Record<ClaimState, string> = {
   solid: "solid",
@@ -137,9 +138,12 @@ export function UnderstandingMap({
   return (
     <section aria-label="Understanding map" className={full ? "w-full max-w-md" : "w-full"}>
       <header className="mb-8">
-        <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
-          Understanding map
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
+            Understanding map
+          </p>
+          <MapHelp />
+        </div>
         <h2 className={`mt-3 font-serif tracking-tight text-ivory ${full ? "text-3xl" : "text-2xl"}`}>
           {conceptTitle}
         </h2>

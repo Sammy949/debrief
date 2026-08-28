@@ -323,12 +323,12 @@ export const SUPPLY_DEMAND_LESSON: Lesson = {
 
 /** The curated library - authored lessons whose content is the teaching source of truth. */
 export const LESSONS: Lesson[] = [
-  CLOSURES_LESSON,
-  INDEXES_LESSON,
-  ASYNC_LESSON,
   COMPOUND_INTEREST_LESSON,
   VACCINES_LESSON,
   SUPPLY_DEMAND_LESSON,
+  CLOSURES_LESSON,
+  INDEXES_LESSON,
+  ASYNC_LESSON,
 ];
 
 export function lessonBySlug(slug: string): Lesson | undefined {

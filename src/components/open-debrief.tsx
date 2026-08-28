@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import { startOpenDebrief } from "@/app/debrief/actions";
 import { DebriefRunner } from "@/components/debrief-runner";
 import { Thinking } from "@/components/thinking";
+import { Wordmark } from "@/components/wordmark";
 import { clearDraft, clearSession, draftKey, loadDraft, loadOpenSession, saveDraft } from "@/lib/session-store";
 import type { Lesson } from "@/core/types";
 
@@ -63,15 +66,26 @@ export function OpenDebrief() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col px-6 py-24">
-      <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
-        Open debrief
-      </p>
-      <h1 className="mt-4 font-serif text-4xl tracking-tight text-ivory sm:text-5xl">
-        What do you want to understand?
-      </h1>
-      <p className="mt-4 text-lg leading-relaxed text-ivory-dim">
-        Name something you think you&apos;ve got down. Debrief maps what a strong explanation needs,
+    <>
+      <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-4 px-6 pt-6">
+        <Wordmark />
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 font-mono text-[0.65rem] tracking-[0.16em] uppercase text-muted-ink transition-colors hover:text-amber"
+        >
+          <ArrowLeft weight="bold" className="size-3" />
+          Back
+        </Link>
+      </div>
+      <div className="mx-auto flex w-full max-w-2xl flex-col px-6 pt-14 pb-24">
+        <p className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted-ink">
+          Open debrief
+        </p>
+        <h1 className="mt-4 font-serif text-4xl tracking-tight text-ivory sm:text-5xl">
+          What do you want to understand?
+        </h1>
+        <p className="mt-4 text-lg leading-relaxed text-ivory-dim">
+          Name something you think you&apos;ve got down. Debrief maps what a strong explanation needs,
         then sees if yours holds up.
       </p>
 
@@ -109,6 +123,7 @@ export function OpenDebrief() {
           )}
         </div>
       </form>
-    </div>
+      </div>
+    </>
   );
 }

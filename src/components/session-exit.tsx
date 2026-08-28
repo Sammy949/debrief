@@ -2,6 +2,7 @@
 
 import { AlertDialog } from "@base-ui/react/alert-dialog";
 import { ArrowLeft, Plus } from "@phosphor-icons/react/dist/ssr";
+import { Wordmark } from "@/components/wordmark";
 import type { Stage } from "@/core/types";
 
 const LINK =
@@ -26,7 +27,10 @@ export function SessionExit({
     stage === "select_focus" || stage === "probe" || stage === "teaching" || stage === "checkpoint";
 
   return (
-    <div className={`mx-auto w-full px-6 pt-6 ${wide ? "max-w-6xl" : "max-w-2xl"}`}>
+    <div
+      className={`mx-auto flex w-full items-center justify-between gap-4 px-6 pt-6 ${wide ? "max-w-6xl" : "max-w-2xl"}`}
+    >
+      <Wordmark />
       {stage === "explanation" ? (
         <button onClick={onExit} className={LINK}>
           <ArrowLeft weight="bold" className="size-3" />

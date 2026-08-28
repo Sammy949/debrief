@@ -16,6 +16,11 @@ const FONT_DIR = join(process.cwd(), "src/app/fonts");
 const regular = readFileSync(join(FONT_DIR, "Sentient-Regular.otf"));
 const medium = readFileSync(join(FONT_DIR, "Sentient-Medium.otf"));
 const italic = readFileSync(join(FONT_DIR, "Sentient-Italic.otf"));
+// The interface + technical voices, same as the app: Geist for body copy, Geist
+// Mono for tracked labels. Satori needs TTF, so these are the Google TrueType builds.
+const geist = readFileSync(join(FONT_DIR, "Geist-Regular.ttf"));
+const geistMedium = readFileSync(join(FONT_DIR, "Geist-Medium.ttf"));
+const geistMono = readFileSync(join(FONT_DIR, "GeistMono-Regular.ttf"));
 
 export const OG_SIZE = { width: 1200, height: 630 };
 export const OG_CONTENT_TYPE = "image/png";
@@ -88,7 +93,9 @@ export function ogImage({ lead, accent, tail, subtitle, page }: OgInput) {
               <span style={{ fontSize: 34, fontWeight: 500 }}>Debrief</span>
             </div>
             {page ? (
-              <span style={{ fontSize: 22, letterSpacing: 4, color: MUTED }}>{page.toUpperCase()}</span>
+              <span style={{ fontFamily: "Geist Mono", fontSize: 19, letterSpacing: 4, color: MUTED }}>
+                {page.toUpperCase()}
+              </span>
             ) : null}
           </div>
 
@@ -100,7 +107,7 @@ export function ogImage({ lead, accent, tail, subtitle, page }: OgInput) {
                 <span style={{ fontStyle: "italic", color: AMBER }}>{accent}</span>
                 {tail ? <span>{tail}</span> : null}
               </div>
-              <span style={{ fontSize: 29, color: IVORY_DIM, lineHeight: 1.4, marginTop: 30, maxWidth: 520 }}>
+              <span style={{ fontFamily: "Geist", fontSize: 28, color: IVORY_DIM, lineHeight: 1.45, marginTop: 30, maxWidth: 520 }}>
                 {subtitle}
               </span>
             </div>
@@ -153,6 +160,9 @@ export function ogImage({ lead, accent, tail, subtitle, page }: OgInput) {
         { name: "Sentient", data: regular, weight: 400, style: "normal" },
         { name: "Sentient", data: medium, weight: 500, style: "normal" },
         { name: "Sentient", data: italic, weight: 400, style: "italic" },
+        { name: "Geist", data: geist, weight: 400, style: "normal" },
+        { name: "Geist", data: geistMedium, weight: 500, style: "normal" },
+        { name: "Geist Mono", data: geistMono, weight: 400, style: "normal" },
       ],
     },
   );

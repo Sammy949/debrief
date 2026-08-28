@@ -38,6 +38,9 @@
   /* muted ochre for genuine error - never an aggressive red */
   --terracotta:    #c77b54;
 
+  /* faint structural grid line (hero backdrop) */
+  --grid-line:     #1c1a16;
+
   /* shadcn semantic tokens mapped onto Editorial Technical */
   --background: var(--obsidian);
   --foreground: var(--ivory);
@@ -60,6 +63,34 @@
 
   /* Strictly architectural - every corner sharp. */
   --radius: 0rem;
+}
+
+/* Light theme: the same Editorial Technical system as ink on warm paper. Only the
+ * raw palette tokens flip; every shadcn token and utility above is defined in terms
+ * of these, so overriding them here re-themes the whole app. Opt-in (default dark). */
+.light {
+  color-scheme: light;
+
+  --obsidian:      #f3efe7;
+  --surface-lowest: #e9e4d8;
+  --surface:       #faf8f2;
+  --surface-high:  #ffffff;
+  --line:          #ddd7c9;
+  --line-strong:   #c7c0ad;
+
+  --ivory:         #23201a;
+  --ivory-dim:     #5a5348;
+  --muted-ink:     #857d6d;
+  --ghost:         #b0a894;
+
+  --amber:         #9a5a2c;
+  --amber-soft:    #b87a3f;
+  --amber-deep:    #6f3d1b;
+
+  --blue:          #2f5bb0;
+  --terracotta:    #b3502f;
+
+  --grid-line:     #e6e0d2;
 }
 
 @theme inline {
@@ -151,8 +182,8 @@
  * so it reads as a drafting canvas, not a full sheet of graph paper. */
 .bg-grid-pattern {
   background-image:
-    linear-gradient(to right, #1c1a16 1px, transparent 1px),
-    linear-gradient(to bottom, #1c1a16 1px, transparent 1px);
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
   background-size: 34px 34px;
   background-position: center top;
 }

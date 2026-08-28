@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { Brain, ArrowRight, List, X } from "@phosphor-icons/react/dist/ssr";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV = [
   { label: "Library", href: "/lessons" },
@@ -44,23 +45,26 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* desktop action */}
-        <Link
-          href="/debrief/new"
-          className="hidden items-center gap-2 bg-ivory px-4 py-2 font-mono text-[0.7rem] font-medium tracking-[0.14em] uppercase text-obsidian transition-colors hover:bg-amber md:inline-flex"
-        >
-          Get Started
-          <ArrowRight weight="bold" className="size-3.5" />
-        </Link>
+        {/* right cluster: theme + primary action (desktop), menu (mobile) */}
+        <div className="flex items-center gap-3">
+          <ThemeToggle className="hidden md:flex" />
 
-        {/* mobile menu */}
-        <Dialog.Root open={open} onOpenChange={setOpen}>
-          <Dialog.Trigger
-            aria-label="Open menu"
-            className="flex size-9 items-center justify-center border border-line text-ivory transition-colors hover:border-amber hover:text-amber md:hidden"
+          <Link
+            href="/debrief/new"
+            className="hidden items-center gap-2 bg-ivory px-4 py-2 font-mono text-[0.7rem] font-medium tracking-[0.14em] uppercase text-obsidian transition-colors hover:bg-amber md:inline-flex"
           >
-            <List weight="bold" className="size-5" />
-          </Dialog.Trigger>
+            Get Started
+            <ArrowRight weight="bold" className="size-3.5" />
+          </Link>
+
+          {/* mobile menu */}
+          <Dialog.Root open={open} onOpenChange={setOpen}>
+            <Dialog.Trigger
+              aria-label="Open menu"
+              className="flex size-9 items-center justify-center border border-line text-ivory transition-colors hover:border-amber hover:text-amber md:hidden"
+            >
+              <List weight="bold" className="size-5" />
+            </Dialog.Trigger>
 
           <Dialog.Portal>
             <Dialog.Backdrop className="fixed inset-0 z-50 bg-obsidian/80 backdrop-blur-md transition-[opacity,backdrop-filter] duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
@@ -97,6 +101,13 @@ export function SiteHeader() {
                 ))}
               </nav>
 
+              <div className="flex items-center justify-between gap-4 border-t border-line px-6 py-4">
+                <span className="font-mono text-[0.7rem] tracking-[0.16em] uppercase text-muted-ink">
+                  Theme
+                </span>
+                <ThemeToggle />
+              </div>
+
               <div className="p-6">
                 <Link
                   href="/debrief/new"
@@ -110,6 +121,7 @@ export function SiteHeader() {
             </Dialog.Popup>
           </Dialog.Portal>
         </Dialog.Root>
+        </div>
       </div>
     </header>
   );

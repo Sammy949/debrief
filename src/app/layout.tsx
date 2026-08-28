@@ -36,12 +36,19 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  // Set the theme before paint (no flash): stored choice wins, else follow the OS.
+  // Default is dark (:root); light mode adds the `light` class.
+  const themeScript =
+    "(function(){try{var s=localStorage.getItem('debrief-theme');var light=s?s==='light':window.matchMedia('(prefers-color-scheme: light)').matches;if(light)document.documentElement.classList.add('light');}catch(e){}})();";
+
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${sentient.variable} ${geist.variable} ${geistMono.variable} antialiased`}
     >
       <body>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <div className="flex min-h-screen flex-col">{children}</div>
       </body>
     </html>

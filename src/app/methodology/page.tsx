@@ -96,12 +96,12 @@ const STATES = [
 ] as const;
 
 const PIPELINE = [
-  { fn: "decomposeAndEvaluate", out: "claims + states", tag: "flagship" },
-  { fn: "selectFocusClaim", out: "the weakest point", tag: "reducer" },
-  { fn: "generateProbe", out: "one curious question", tag: "fast" },
-  { fn: "evaluateFocusAnswer", out: "re-judged claim", tag: "flagship" },
-  { fn: "generateTeaching", out: "the distinction", tag: "fast" },
-  { fn: "generateRepair", out: "apply it anew", tag: "fast" },
+  { fn: "decomposeAndEvaluate", out: "claims + states" },
+  { fn: "selectFocusClaim", out: "the weakest point" },
+  { fn: "generateProbe", out: "one curious question" },
+  { fn: "evaluateFocusAnswer", out: "re-judged claim" },
+  { fn: "generateTeaching", out: "the distinction" },
+  { fn: "generateRepair", out: "apply it anew" },
 ] as const;
 
 export default function MethodologyPage() {
@@ -273,16 +273,7 @@ export default function MethodologyPage() {
                   >
                     <span className="text-ivory">{p.fn}</span>
                     <span className="hidden h-px flex-1 bg-line sm:block" aria-hidden="true" />
-                    <span className="flex items-center justify-between gap-3 sm:contents">
-                      <span className="text-muted-ink">{p.out}</span>
-                      <span
-                        className={`shrink-0 tracking-[0.12em] uppercase sm:w-16 sm:text-right ${
-                          p.tag === "reducer" ? "text-amber" : "text-ghost"
-                        }`}
-                      >
-                        {p.tag}
-                      </span>
-                    </span>
+                    <span className="text-muted-ink">{p.out}</span>
                   </li>
                 ))}
               </ul>

@@ -6,7 +6,6 @@ export const alt = "Debrief: make your understanding visible";
 
 export default function Image() {
   return ogImage({
-    eyebrow: "The teach-back method",
     lead: "Make your",
     accent: "understanding",
     tail: "visible.",

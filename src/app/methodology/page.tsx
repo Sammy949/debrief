@@ -265,18 +265,23 @@ export default function MethodologyPage() {
                   <span className="size-1.5 bg-line-strong" />
                 </div>
               </div>
-              <ul className="flex list-none flex-col gap-3 p-0 font-mono text-xs">
+              <ul className="flex list-none flex-col gap-3.5 p-0 font-mono text-xs sm:gap-3">
                 {PIPELINE.map((p) => (
-                  <li key={p.fn} className="flex items-center gap-3">
+                  <li
+                    key={p.fn}
+                    className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3"
+                  >
                     <span className="text-ivory">{p.fn}</span>
-                    <span className="h-px flex-1 bg-line" aria-hidden="true" />
-                    <span className="text-muted-ink">{p.out}</span>
-                    <span
-                      className={`w-16 shrink-0 text-right tracking-[0.12em] uppercase ${
-                        p.tag === "reducer" ? "text-amber" : "text-ghost"
-                      }`}
-                    >
-                      {p.tag}
+                    <span className="hidden h-px flex-1 bg-line sm:block" aria-hidden="true" />
+                    <span className="flex items-center justify-between gap-3 sm:contents">
+                      <span className="text-muted-ink">{p.out}</span>
+                      <span
+                        className={`shrink-0 tracking-[0.12em] uppercase sm:w-16 sm:text-right ${
+                          p.tag === "reducer" ? "text-amber" : "text-ghost"
+                        }`}
+                      >
+                        {p.tag}
+                      </span>
                     </span>
                   </li>
                 ))}

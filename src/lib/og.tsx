@@ -20,9 +20,14 @@ export const OG_CONTENT_TYPE = "image/png";
 const PAPER = "#f3efe7";
 const INK = "#23201a";
 const INK_DIM = "#5a5348";
+const MUTED = "#8a8272";
 const LINE = "#ddd7c9";
 const AMBER = "#9a5a2c";
-const GRID = "#e4ddcd";
+const GRID = "#e0d8c6";
+
+const W = 1200;
+const H = 630;
+const CELL = 34;
 
 const BRAIN =
   "M248,124a56.11,56.11,0,0,0-32-50.61V72a48,48,0,0,0-88-26.49A48,48,0,0,0,40,72v1.39a56,56,0,0,0,0,101.2V176a48,48,0,0,0,88,26.49A48,48,0,0,0,216,176v-1.41A56.09,56.09,0,0,0,248,124ZM88,208a32,32,0,0,1-31.81-28.56A55.87,55.87,0,0,0,64,180h8a8,8,0,0,0,0-16H64A40,40,0,0,1,50.67,86.27,8,8,0,0,0,56,78.73V72a32,32,0,0,1,64,0v68.26A47.8,47.8,0,0,0,88,128a8,8,0,0,0,0,16,32,32,0,0,1,0,64Zm104-44h-8a8,8,0,0,0,0,16h8a55.87,55.87,0,0,0,7.81-.56A32,32,0,1,1,168,144a8,8,0,0,0,0-16,47.8,47.8,0,0,0-32,12.26V72a32,32,0,0,1,64,0v6.73a8,8,0,0,0,5.33,7.54A40,40,0,0,1,192,164Zm16-52a8,8,0,0,1-8,8h-4a36,36,0,0,1-36-36V80a8,8,0,0,1,16,0v4a20,20,0,0,0,20,20h4A8,8,0,0,1,208,112ZM60,120H56a8,8,0,0,1,0-16h4A20,20,0,0,0,80,84V80a8,8,0,0,1,16,0v4A36,36,0,0,1,60,120Z";
@@ -33,9 +38,14 @@ export interface OgInput {
   accent: string;
   tail?: string;
   subtitle: string;
+  /** Page name shown beside the wordmark (omitted on the home image). */
+  page?: string;
 }
 
-export function ogImage({ lead, accent, tail, subtitle }: OgInput) {
+export function ogImage({ lead, accent, tail, subtitle, page }: OgInput) {
+  const columns = Array.from({ length: Math.floor(W / CELL) + 1 }, (_, i) => i * CELL);
+  const rows = Array.from({ length: Math.floor(H / CELL) + 1 }, (_, i) => i * CELL);
+
   return new ImageResponse(
     (
       <div
@@ -49,26 +59,30 @@ export function ogImage({ lead, accent, tail, subtitle }: OgInput) {
           fontFamily: "Sentient",
         }}
       >
-        {/* faint structural grid, fading into the paper toward the bottom */}
+        {/* faint structural grid, drawn as explicit lines so it always renders */}
+        {columns.map((x) => (
+          <div
+            key={`c${x}`}
+            style={{ position: "absolute", top: 0, left: x, width: 1, height: H, backgroundColor: GRID }}
+          />
+        ))}
+        {rows.map((y) => (
+          <div
+            key={`r${y}`}
+            style={{ position: "absolute", top: y, left: 0, width: W, height: 1, backgroundColor: GRID }}
+          />
+        ))}
+        {/* fade the grid into the paper toward the bottom */}
         <div
           style={{
             position: "absolute",
             inset: 0,
             display: "flex",
-            backgroundImage: `linear-gradient(to right, ${GRID} 1px, transparent 1px), linear-gradient(to bottom, ${GRID} 1px, transparent 1px)`,
-            backgroundSize: "34px 34px",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            backgroundImage: `linear-gradient(to bottom, rgba(243,239,231,0) 28%, ${PAPER} 92%)`,
+            backgroundImage: `linear-gradient(to bottom, rgba(243,239,231,0) 26%, ${PAPER} 90%)`,
           }}
         />
 
-        {/* content: title up top, wordmark at the foot */}
+        {/* content: title up top, wordmark at the foot, spanning the full width */}
         <div
           style={{
             position: "relative",
@@ -81,13 +95,13 @@ export function ogImage({ lead, accent, tail, subtitle }: OgInput) {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", flexDirection: "column", fontSize: 80, lineHeight: 1.05 }}>
+            <div style={{ display: "flex", flexDirection: "column", fontSize: 94, lineHeight: 1.02 }}>
               <span>{lead}</span>
               <span style={{ fontStyle: "italic", color: AMBER }}>{accent}</span>
               {tail ? <span>{tail}</span> : null}
             </div>
             <span
-              style={{ fontSize: 28, color: INK_DIM, maxWidth: 820, lineHeight: 1.4, marginTop: 32 }}
+              style={{ fontSize: 31, color: INK_DIM, maxWidth: 1000, lineHeight: 1.4, marginTop: 34 }}
             >
               {subtitle}
             </span>
@@ -99,6 +113,9 @@ export function ogImage({ lead, accent, tail, subtitle }: OgInput) {
                 <path d={BRAIN} fill={AMBER} />
               </svg>
               <span style={{ fontSize: 36, fontWeight: 500 }}>Debrief</span>
+              {page ? (
+                <span style={{ fontSize: 36, color: MUTED }}>&nbsp;&middot;&nbsp;{page}</span>
+              ) : null}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <div style={{ display: "flex", height: 3, width: 120, backgroundColor: INK_DIM }} />

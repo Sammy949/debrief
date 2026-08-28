@@ -6,6 +6,7 @@ export const alt = "The Debrief library";
 
 export default function Image() {
   return ogImage({
+    page: "Library",
     lead: "Bring your own concept, or",
     accent: "start with ours.",
     subtitle: "Curated debriefs across code, money, science, and markets.",

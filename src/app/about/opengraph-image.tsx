@@ -6,6 +6,7 @@ export const alt = "About Debrief";
 
 export default function Image() {
   return ogImage({
+    page: "About",
     lead: "Don't just learn it.",
     accent: "Debrief it.",
     subtitle:

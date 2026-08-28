@@ -321,13 +321,14 @@ export const SUPPLY_DEMAND_LESSON: Lesson = {
     "Now put it to work: coffee gets pricier and people buy less. Did the demand curve shift, or did you move along it, and why?",
 };
 
-/** The curated library - authored lessons whose content is the teaching source of truth. */
+/** The curated library - authored lessons whose content is the teaching source of truth.
+ *  Database indexes leads, to match the concept shown in the homepage hero. */
 export const LESSONS: Lesson[] = [
+  INDEXES_LESSON,
   COMPOUND_INTEREST_LESSON,
   VACCINES_LESSON,
   SUPPLY_DEMAND_LESSON,
   CLOSURES_LESSON,
-  INDEXES_LESSON,
   ASYNC_LESSON,
 ];
 

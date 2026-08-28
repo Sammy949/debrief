@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import type { ReactNode } from "react";
+import { Wordmark } from "@/components/wordmark";
 
 export interface LegalSection {
   heading: string;
@@ -22,13 +23,14 @@ export function LegalPage({
   return (
     <>
       <header className="border-b border-line">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2 text-muted-ink transition-colors hover:text-ivory">
-            <ArrowLeft weight="bold" className="size-4" />
-            <span className="font-mono text-[0.7rem] tracking-[0.16em] uppercase">Back</span>
-          </Link>
-          <Link href="/" className="font-serif text-xl tracking-tight text-ivory">
-            Debrief
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
+          <Wordmark />
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 font-mono text-[0.65rem] tracking-[0.16em] uppercase text-muted-ink transition-colors hover:text-amber"
+          >
+            <ArrowLeft weight="bold" className="size-3" />
+            Back
           </Link>
         </div>
       </header>

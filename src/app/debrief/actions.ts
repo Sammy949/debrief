@@ -65,15 +65,25 @@ async function teachingContent(lesson: Lesson, state: SessionState): Promise<Tur
   if (!focusClaim) return {};
   const breakPoint = state.claims.find((c) => c.id === state.focusClaimId)?.evidenceQuote ?? null;
 
+  const authoredFallback: TeachingIntervention = {
+    distinction: focusClaim.teachingNote,
+    example: lesson.counterexample,
+    takeaway: focusClaim.teachingNote,
+  };
+
   let intervention: TeachingIntervention;
   try {
     intervention = await generateTeachingIntervention(lesson, focusClaim, breakPoint);
   } catch {
-    intervention = {
-      distinction: focusClaim.teachingNote,
-      example: lesson.counterexample,
-      takeaway: focusClaim.teachingNote,
-    };
+    intervention = authoredFallback;
+  }
+
+  // Teaching only fires on a still-broken claim, so a "no correction needed" reply
+  // is a model miss, not a valid answer. Fall back to the authored note rather than
+  // showing the learner a non-correction.
+  if (isDegenerateDistinction(intervention.distinction)) {
+    console.warn("[debrief] degenerate teaching intervention, using fallback:", intervention.distinction);
+    intervention = { ...authoredFallback, example: intervention.example || authoredFallback.example };
   }
 
   let repairQuestion: string;
@@ -84,6 +94,15 @@ async function teachingContent(lesson: Lesson, state: SessionState): Promise<Tur
   }
 
   return { intervention, repairQuestion };
+}
+
+/** A correction that isn't one — empty, or a no-op like "no correction needed". */
+function isDegenerateDistinction(distinction: string | undefined): boolean {
+  const d = (distinction ?? "").trim();
+  if (d.length < 12) return true;
+  return /\b(no correction needed|nothing to correct|no changes? needed|looks correct|already correct|n\/?a)\b/i.test(
+    d,
+  );
 }
 
 function slugify(s: string): string {

@@ -338,7 +338,8 @@ export async function generateTeachingIntervention(
 ): Promise<TeachingIntervention> {
   const system = [
     "You repair ONE mental-model distinction, briefly, in a teach-back tool.",
-    "Ground the correction in the provided teaching note — do NOT introduce new claims or contradict it.",
+    "The learner's claim is already wrong, so you are PAST deciding whether to correct it. Never reply that no correction is needed, never say it looks fine, and never leave a field blank. Always give a real, specific distinction.",
+    "Ground the correction in the provided teaching note. Do not introduce new claims or contradict it.",
     "Return: distinction (one or two sentences correcting the specific misunderstanding), example (one short, concrete example or contrast that makes it click), takeaway (one short sentence to hold onto).",
     "Plain language. No lecture.",
     TONE,

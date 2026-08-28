@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /**
  * Zod schemas for validating Groq responses. They mirror the /core domain types
- * exactly — including the discriminated-union quote invariant: only a
+ * exactly - including the discriminated-union quote invariant: only a
  * `needs_attention` claim carries a break-point quote. Strict structured output
  * guarantees the JSON *shape*; these guard the *content* (defence in depth), and
  * the substring gate in the reducer guards the quote against the learner's text.
@@ -54,7 +54,7 @@ export const repairQuestionSchema = z.object({
  * slip through half-checked. Zod guards the shape of each array; the reducer's
  * substring gate guards the quotes; and `decomposeAndEvaluate` adds a semantic check
  * that the two arrays line up one-to-one on claim id (shape validity ≠ referential
- * integrity — that relationship is the one thing this schema alone cannot prove).
+ * integrity - that relationship is the one thing this schema alone cannot prove).
  */
 export const conceptDebriefSchema = z.object({
   claims: z.array(
@@ -73,7 +73,7 @@ export const conceptDebriefSchema = z.object({
 /**
  * LENIENT response schemas. Groq's strict structured output guarantees the JSON
  * SHAPE, but not the conditional quote invariant (only `needs_attention` carries
- * a quote) — the model routinely attaches a quote to a `solid` claim or omits a
+ * a quote) - the model routinely attaches a quote to a `solid` claim or omits a
  * rationale. The strict discriminated-union schemas above would REJECT that
  * otherwise-usable output and fail the whole turn. So we parse leniently here and
  * normalize to the strict domain type in code (see `functions.ts`), which is far

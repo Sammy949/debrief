@@ -1,8 +1,8 @@
 /**
- * The five AI functions — Debrief's only calls to the model. Each has a narrow
+ * The five AI functions - Debrief's only calls to the model. Each has a narrow
  * role, a strict request schema, and Zod validation on the response. Curated
  * lesson content anchors the teaching so Groq only adapts wording; it cannot
- * invent a wrong distinction. Every function throws on failure — the caller
+ * invent a wrong distinction. Every function throws on failure - the caller
  * (server action) falls back to authored lesson content.
  *
  * SERVER-ONLY (imports the Groq client, which reads GROQ_API_KEY).
@@ -65,7 +65,7 @@ const FAST: GroqModel = "openai/gpt-oss-20b"; //  generative: question / interve
 // Shared voice for everything the learner reads. Evaluators stay neutral; the
 // generative prompts (questions, teaching) speak in this coach voice.
 const TONE =
-  "Voice: an encouraging coach — warm, second person, a little momentum. A brief, genuine bit of reassurance is welcome; keep it plain and human, never clinical or rubric-like. Contractions are good. No emoji.";
+  "Voice: an encouraging coach: warm, second person, a little momentum. A brief, genuine bit of reassurance is welcome; keep it plain and human, never clinical or rubric-like. Contractions are good. No emoji, and no em dashes; use plain punctuation.";
 
 const CLAIM_STATE_ENUM = ["solid", "unclear", "needs_attention", "untested"] as const;
 
@@ -213,13 +213,13 @@ export async function evaluateExplanation(
   return { evaluations: parsed.evaluations.map(normalizeClaimEval) };
 }
 
-// --- 2. probe questions (fast) — one generator per FocusKind --------------
+// --- 2. probe questions (fast) - one generator per FocusKind --------------
 // All three return the same { question } shape; the reducer's focusKind picks which
 // fires. They differ only in intent, because probing a wrong answer, inviting the
 // learner into an untouched gap, and stress-testing a solid answer are three
 // different conversations.
 
-/** `weakness`: the claim was wrong or vague — probe the weakest point of what they said. */
+/** `weakness`: the claim was wrong or vague - probe the weakest point of what they said. */
 export async function generateWeaknessQuestion(
   lesson: Lesson,
   focusClaim: LessonClaim,
@@ -246,7 +246,7 @@ export async function generateWeaknessQuestion(
   return curiousQuestionSchema.parse(raw);
 }
 
-/** `unaddressed`: the learner never touched this part — invite them into it. */
+/** `unaddressed`: the learner never touched this part - invite them into it. */
 export async function generateUnaddressedQuestion(
   lesson: Lesson,
   focusClaim: LessonClaim,
@@ -272,7 +272,7 @@ export async function generateUnaddressedQuestion(
   return curiousQuestionSchema.parse(raw);
 }
 
-/** `verification`: every claim was solid — a transfer check in a new situation. */
+/** `verification`: every claim was solid - a transfer check in a new situation. */
 export async function generateVerificationQuestion(
   lesson: Lesson,
   focusClaim: LessonClaim,
@@ -280,7 +280,7 @@ export async function generateVerificationQuestion(
 ): Promise<CuriousQuestion> {
   const system = [
     "You are a curious reviewer in a teach-back tool. The learner explained every essential claim solidly, so this is a transfer check, not a correction.",
-    "Point to a SPECIFIC, concrete example or scenario and ask what happens in it — so the learner has to use the idea, not restate it.",
+    "Point to a SPECIFIC, concrete example or scenario and ask what happens in it - so the learner has to use the idea, not restate it.",
     "Sound like a curious person, not a rubric. NEVER use abstract phrasing like 'apply this in a new situation' or 'use this idea in a new context'; name an actual case instead. One or two sentences, answerable briefly, and don't reveal the answer. Return only the question.",
     TONE,
   ].join("\n");
@@ -369,7 +369,7 @@ export async function generateRepairQuestion(
 ): Promise<RepairQuestion> {
   const system = [
     "Ask ONE question that forces the learner to USE the repaired idea in a new situation (type 'apply'), or to explain WHY it works (type 'why').",
-    "Prefer 'apply' when the concept has a concrete application. Ground it in a SPECIFIC example — name the case rather than saying 'a new situation' abstractly. Warm, plain, human phrasing, answerable in a few sentences, and it must require using the correction, not restating a definition.",
+    "Prefer 'apply' when the concept has a concrete application. Ground it in a SPECIFIC example - name the case rather than saying 'a new situation' abstractly. Warm, plain, human phrasing, answerable in a few sentences, and it must require using the correction, not restating a definition.",
     TONE,
   ].join("\n");
 
@@ -400,7 +400,7 @@ export async function decomposeAndEvaluate(
 ): Promise<ConceptDebrief> {
   const system = [
     "You map a learner's explanation into its essential claims AND judge each one, in a single pass, for a teach-back learning tool. You are not authoring a textbook curriculum.",
-    "CLAIMS: From the topic and the learner's OWN explanation, identify 3 to 5 claims that a complete, correct version of THIS explanation would need to make. Base them on the framing and vocabulary the learner actually used — each claim should trace back to something they said or gestured at — not on a standard textbook breakdown of the topic. Add a claim the learner omitted ONLY if it is genuinely essential to correctness (not merely a deeper detail).",
+    "CLAIMS: From the topic and the learner's OWN explanation, identify 3 to 5 claims that a complete, correct version of THIS explanation would need to make. Base them on the framing and vocabulary the learner actually used - each claim should trace back to something they said or gestured at - not on a standard textbook breakdown of the topic. Add a claim the learner omitted ONLY if it is genuinely essential to correctness (not merely a deeper detail).",
     "For each claim: id (exactly 'c1','c2',… in order), shortLabel (2 to 4 words for a diagram), claim (one clear sentence), whyItMatters (one sentence), teachingNote (a one-sentence correction of the likely misunderstanding), commonMisconception (a common wrong belief, or null).",
     "EVALUATION: Then judge EACH claim from the explanation ALONE, returning exactly one evaluation per claim whose sourceClaimId is that claim's id:",
     "- solid: clearly and correctly explained.",
@@ -446,7 +446,7 @@ export async function decomposeAndEvaluate(
 
   // Reconcile rather than reject: keep one evaluation per real claim id, drop the
   // rest. A claim the model didn't evaluate simply stays `untested` in the reducer
-  // — a valid state, not a reason to fail the whole turn.
+  // - a valid state, not a reason to fail the whole turn.
   const seen = new Set<string>();
   const evaluations: ClaimEvaluation[] = [];
   for (const e of parsed.evaluations) {

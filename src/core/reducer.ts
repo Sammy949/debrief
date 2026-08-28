@@ -1,5 +1,5 @@
 /**
- * Debrief — the pure state machine. "The reducer decides."
+ * Debrief - the pure state machine. "The reducer decides."
  *
  * Every transition lives here as a pure function of (state, event). The AI's
  * validated judgment rides on the event, so nothing in this file calls Groq,
@@ -32,7 +32,7 @@ const WEAKNESS_PRIORITY: Record<ClaimState, number> = {
 };
 
 // ---------------------------------------------------------------------------
-// Initial state — a session begins in `explanation` with every claim untested.
+// Initial state - a session begins in `explanation` with every claim untested.
 // ---------------------------------------------------------------------------
 
 export function createInitialState(lesson: Lesson): SessionState {
@@ -62,7 +62,7 @@ export function createInitialState(lesson: Lesson): SessionState {
 }
 
 // ---------------------------------------------------------------------------
-// Evidence-quote validation — normalize, locate in the ORIGINAL text, and
+// Evidence-quote validation - normalize, locate in the ORIGINAL text, and
 // return the learner's ORIGINAL words for the matched span (never the
 // normalized form). Resilient to case / whitespace / quote / dash drift.
 // ---------------------------------------------------------------------------
@@ -108,7 +108,7 @@ export function validateEvidenceQuote(quote: string | null, sourceText: string):
 }
 
 // ---------------------------------------------------------------------------
-// Focus selection — one focus per debrief.
+// Focus selection - one focus per debrief.
 // ---------------------------------------------------------------------------
 
 export function selectFocusClaim(claims: Claim[]): { claimId: string; kind: FocusKind } | null {
@@ -125,7 +125,7 @@ export function selectFocusClaim(claims: Claim[]): { claimId: string; kind: Focu
 /**
  * The probe's kind follows the claim's state. "Never mentioned" and "verified
  * solid" are opposite signals: an untested claim is a gap to INVITE into, a solid
- * one is a transfer check — they must never share a kind.
+ * one is a transfer check - they must never share a kind.
  */
 export function focusKindFor(state: ClaimState): FocusKind {
   return state === "solid" ? "verification" : state === "untested" ? "unaddressed" : "weakness";
@@ -185,7 +185,7 @@ function toSummary(state: SessionState): SessionState {
 }
 
 /**
- * Claims still worth a probe, EXCLUDING the one just worked — so continuing never
+ * Claims still worth a probe, EXCLUDING the one just worked - so continuing never
  * immediately re-focuses the same claim (that would loop on a stubborn gap; the
  * turn cap and the learner's "wrap up" are the ways out). Empty ⇒ nothing left to
  * offer, so the session settles instead of pausing at a checkpoint.
@@ -205,7 +205,7 @@ function resolveOrCheckpoint(state: SessionState): SessionState {
 
 export function reduce(state: SessionState, event: DebriefEvent): SessionState {
   if (state.stage === "summary") return state; // terminal
-  // Backstop: a session that hits the turn cap is, by definition, unresolved —
+  // Backstop: a session that hits the turn cap is, by definition, unresolved -
   // force a summary with an explicit gap_to_revisit, never an accidental verdict.
   if (state.turnCount >= MAX_TURNS) {
     return { ...state, stage: "summary", verdict: "gap_to_revisit" };

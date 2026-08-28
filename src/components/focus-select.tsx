@@ -18,7 +18,7 @@ import type { Claim } from "@/core/types";
  * The learner points at the gap to dig into first. Options are the agent's own
  * findings (the non-solid claims + why each looked shaky), surfaced back as a
  * single-select. Built on the accessible shadcn Questionnaire; the pick comes off
- * the form on submit. No new model call — these gaps were already found when the
+ * the form on submit. No new model call - these gaps were already found when the
  * explanation was mapped.
  */
 export function FocusSelect({

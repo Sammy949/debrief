@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
-// The concept voice — a distinctive editorial serif (self-hosted, Fontshare Sentient).
+// The concept voice - a distinctive editorial serif (self-hosted, Fontshare Sentient).
 // Used for headlines, questions, and quotes. Variable, so weight is a range.
 const sentient = localFont({
   src: [
@@ -15,14 +15,14 @@ const sentient = localFont({
   fallback: ["Iowan Old Style", "Palatino", "Georgia", "serif"],
 });
 
-// The interface voice — body, labels, inputs.
+// The interface voice - body, labels, inputs.
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 });
 
-// Technical data — the terminal-style response field, code, filenames.
+// Technical data - the terminal-style response field, code, filenames.
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",

@@ -20,7 +20,7 @@ const claim = (id: string, state: ClaimState, focusOrder: number): Claim => ({
   focusOrder,
 });
 
-describe("selectFocusClaim — kinds", () => {
+describe("selectFocusClaim - kinds", () => {
   it("all untested, none solid → unaddressed (never verification)", () => {
     const focus = selectFocusClaim([
       claim("c1", "untested", 0),
@@ -68,10 +68,10 @@ describe("selectFocusClaim — kinds", () => {
 /**
  * Fix 2 (downstream only): the open path decomposes claims from the explanation,
  * then runs the SAME reducer transition as the authored path. This asserts that
- * given a decomposed claim list + its evaluations, the map renders correctly —
+ * given a decomposed claim list + its evaluations, the map renders correctly -
  * the decomposition Groq call itself is verified live, not here.
  */
-describe("open path — decomposed claims drive the reducer", () => {
+describe("open path - decomposed claims drive the reducer", () => {
   const lessonFrom = (claims: Lesson["claims"]): Lesson => ({
     slug: "open",
     title: "how the internet works",

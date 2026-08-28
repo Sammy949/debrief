@@ -96,7 +96,7 @@ async function teachingContent(lesson: Lesson, state: SessionState): Promise<Tur
   return { intervention, repairQuestion };
 }
 
-/** A correction that isn't one — empty, or a no-op like "no correction needed". */
+/** A correction that isn't one - empty, or a no-op like "no correction needed". */
 function isDegenerateDistinction(distinction: string | undefined): boolean {
   const d = (distinction ?? "").trim();
   if (d.length < 12) return true;
@@ -114,7 +114,7 @@ function slugify(s: string): string {
 /**
  * The shell an open debrief starts from: a title and objective, but NO claims.
  * Claims are decomposed from the learner's own explanation at submit time (see
- * `submitOpenExplanation`), so nothing here imposes a curriculum in advance —
+ * `submitOpenExplanation`), so nothing here imposes a curriculum in advance -
  * and entry needs no Groq call, so the explanation screen appears instantly.
  */
 function openLessonShell(concept: string): Lesson {
@@ -122,7 +122,7 @@ function openLessonShell(concept: string): Lesson {
   return {
     slug: slugify(title),
     title,
-    objective: `Explain ${title} in your own words — well enough that it holds up when someone digs in.`,
+    objective: `Explain ${title} in your own words, well enough that it holds up when someone digs in.`,
     difficulty: "intermediate",
     mode: "open",
     claims: [],
@@ -133,10 +133,10 @@ function openLessonShell(concept: string): Lesson {
     fallbackWeaknessQuestion:
       "Which part feels shakiest to you? Take another run at just that piece.",
     fallbackUnaddressedQuestion:
-      "There's one piece you haven't touched yet — walk me through it?",
+      "There's one piece you haven't touched yet. Walk me through it?",
     fallbackVerificationQuestion:
-      "You've got the core — let's stretch it. Pick a real example where this shows up and walk through what happens.",
-    fallbackRepairQuestion: "Now put it to work — try it on a fresh example. What happens, and why?",
+      "You've got the core, so let's stretch it. Pick a real example where this shows up and walk through what happens.",
+    fallbackRepairQuestion: "Now put it to work. Try it on a fresh example: what happens, and why?",
   };
 }
 
@@ -166,7 +166,7 @@ async function submitOpenExplanation(lesson: Lesson, text: string): Promise<Turn
       state: shell,
       content: {},
       error:
-        "Almost! I need a bit more to go on — add a line or two on how it works, and let's try again.",
+        "Almost! I need a bit more to go on. Add a line or two on how it works, and let's try again.",
     };
   }
 
@@ -193,7 +193,7 @@ export async function submitExplanation(
   state: SessionState,
   text: string,
 ): Promise<TurnResult> {
-  // Open concept: claims don't exist yet — derive them from this explanation.
+  // Open concept: claims don't exist yet - derive them from this explanation.
   if (lesson.mode === "open") return submitOpenExplanation(lesson, text);
 
   let evaluation: ExplanationEvaluation;
@@ -201,7 +201,7 @@ export async function submitExplanation(
     evaluation = await evaluateExplanation(lesson, text);
   } catch (err) {
     console.error("[debrief] evaluateExplanation failed:", err);
-    return { state, content: {}, error: "That didn't come through — mind sending it again?" };
+    return { state, content: {}, error: "That didn't come through. Mind sending it again?" };
   }
   const next = reduce(state, { type: "SUBMIT_EXPLANATION", text, evaluation });
   return { state: next, content: await curiousContent(lesson, next, text) };
@@ -213,14 +213,14 @@ export async function answerCurious(
   text: string,
 ): Promise<TurnResult> {
   const focusClaim = focusClaimOf(lesson, state);
-  if (!focusClaim) return { state, content: {}, error: "Lost the thread there — let's start fresh." };
+  if (!focusClaim) return { state, content: {}, error: "Lost the thread there. Let's start fresh." };
 
   let evaluation: FocusEvaluation;
   try {
     evaluation = await evaluateFocusAnswer(lesson, focusClaim, text);
   } catch (err) {
     console.error("[debrief] evaluateFocusAnswer (curious) failed:", err);
-    return { state, content: {}, error: "That didn't come through — give it another go?" };
+    return { state, content: {}, error: "That didn't come through. Give it another go?" };
   }
   const next = reduce(state, { type: "ANSWER_CURIOUS", text, evaluation });
   const content = next.stage === "teaching" ? await teachingContent(lesson, next) : {};
@@ -233,14 +233,14 @@ export async function answerRepair(
   text: string,
 ): Promise<TurnResult> {
   const focusClaim = focusClaimOf(lesson, state);
-  if (!focusClaim) return { state, content: {}, error: "Lost the thread there — let's start fresh." };
+  if (!focusClaim) return { state, content: {}, error: "Lost the thread there. Let's start fresh." };
 
   let evaluation: FocusEvaluation;
   try {
     evaluation = await evaluateFocusAnswer(lesson, focusClaim, text);
   } catch (err) {
     console.error("[debrief] evaluateFocusAnswer (repair) failed:", err);
-    return { state, content: {}, error: "That didn't come through — give it another go?" };
+    return { state, content: {}, error: "That didn't come through. Give it another go?" };
   }
   const next = reduce(state, { type: "ANSWER_REPAIR", text, evaluation });
   return { state: next, content: {} };
@@ -249,7 +249,7 @@ export async function answerRepair(
 /**
  * Checkpoint → keep going: the reducer picks the next weakest claim and returns to
  * `probe`; we generate that probe against the learner's original explanation so the
- * question has context. No new AI judgment — CONTINUE is pure navigation.
+ * question has context. No new AI judgment - CONTINUE is pure navigation.
  */
 export async function continueDebrief(lesson: Lesson, state: SessionState): Promise<TurnResult> {
   const next = reduce(state, { type: "CONTINUE" });
@@ -265,7 +265,7 @@ export async function wrapUp(state: SessionState): Promise<TurnResult> {
 /**
  * select_focus → the learner picked which mapped gap to work first. Set it as the
  * focus and generate that probe against their original explanation. No new judgment
- * — the gaps were already found by decomposeAndEvaluate.
+ * - the gaps were already found by decomposeAndEvaluate.
  */
 export async function selectFocus(
   lesson: Lesson,

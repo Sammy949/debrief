@@ -1,10 +1,10 @@
 /**
- * Groq client — the single impure boundary to the model.
+ * Groq client - the single impure boundary to the model.
  *
  * SERVER-ONLY: reads GROQ_API_KEY. Only ever imported by server actions, never
  * by a client component. Uses Groq's OpenAI-compatible endpoint with STRICT
  * structured outputs (constrained decoding) so the returned JSON always matches
- * the schema shape. Callers still Zod-validate the result — strict guarantees
+ * the schema shape. Callers still Zod-validate the result - strict guarantees
  * structure, not semantics.
  */
 
@@ -37,7 +37,7 @@ export interface GroqStructuredRequest {
 
 /**
  * Calls Groq with strict structured output and returns the parsed JSON as
- * `unknown` — the caller is responsible for Zod-validating it. Throws GroqError
+ * `unknown` - the caller is responsible for Zod-validating it. Throws GroqError
  * on failure (the caller decides whether to fall back to authored content).
  */
 export async function callGroqStructured(req: GroqStructuredRequest): Promise<unknown> {

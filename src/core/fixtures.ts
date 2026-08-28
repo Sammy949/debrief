@@ -42,7 +42,7 @@ export const CLOSURES_LESSON: Lesson = {
   workedExample:
     "function makeCounter() { let n = 0; return () => ++n; } const next = makeCounter(); next(); next(); // 2",
   counterexample:
-    "In a for-loop with var, every closure shares the same i and reads its final value — not the value at creation.",
+    "In a for-loop with var, every closure shares the same i and reads its final value, not the value at creation.",
   applicationScenarios: [
     "You build a counter with a closure. After three calls, what does it return, and why?",
   ],
@@ -92,7 +92,7 @@ export const INDEXES_LESSON: Lesson = {
   workedExample:
     "SELECT * FROM users WHERE email = 'a@b.com' with an index on email walks the B-tree straight to the row, instead of scanning every user.",
   counterexample:
-    "SELECT * FROM users WHERE lower(email) = '…' can't use a plain email index — the function on the column defeats it, and it scans.",
+    "SELECT * FROM users WHERE lower(email) = '…' can't use a plain email index; the function on the column defeats it, and it scans.",
   applicationScenarios: [
     "A query filtering on an unindexed column is slow. Where does the time go, and what would an index change?",
   ],
@@ -100,9 +100,9 @@ export const INDEXES_LESSON: Lesson = {
   fallbackWeaknessQuestion:
     "Step by step, what is the database doing differently once the index exists?",
   fallbackUnaddressedQuestion:
-    "You haven't touched what an index costs yet — what does the database pay to keep one?",
+    "You haven't touched what an index costs yet. What does the database pay to keep one?",
   fallbackVerificationQuestion:
-    "You've got the core — picture a table with millions of rows and a query on an unindexed column. What happens, and how does an index change it?",
+    "You've got the core. Now picture a table with millions of rows and a query on an unindexed column. What happens, and how does an index change it?",
   fallbackRepairQuestion:
     "Now put it to work: you add an index on a column you filter by constantly. What gets faster, and what gets slower?",
 };
@@ -116,7 +116,7 @@ export const ASYNC_LESSON: Lesson = {
   claims: [
     {
       id: "pauses",
-      claim: "await pauses only the current async function until the promise settles — it doesn't block the rest of the program.",
+      claim: "await pauses only the current async function until the promise settles; it doesn't block the rest of the program.",
       shortLabel: "Pauses the function, not everything",
       whyItMatters: "It's the whole point: waiting without freezing the app.",
       teachingNote: "await suspends just the async function it's in; the event loop keeps running other work in the meantime.",
@@ -140,7 +140,7 @@ export const ASYNC_LESSON: Lesson = {
     },
   ],
   workedExample:
-    "console.log('a'); await fetch(url); console.log('b') — 'a' prints now, control returns to the caller, and 'b' prints only after the fetch settles.",
+    "console.log('a'); await fetch(url); console.log('b'): 'a' prints now, control returns to the caller, and 'b' prints only after the fetch settles.",
   counterexample:
     "Awaiting inside a for-loop runs requests one after another; Promise.all would let independent ones run together.",
   applicationScenarios: [
@@ -150,14 +150,14 @@ export const ASYNC_LESSON: Lesson = {
   fallbackWeaknessQuestion:
     "The moment you hit await, what happens to the rest of the program while it waits?",
   fallbackUnaddressedQuestion:
-    "You haven't said what an async function hands back to whoever called it — what is it?",
+    "You haven't said what an async function hands back to whoever called it. What is it?",
   fallbackVerificationQuestion:
-    "You've got the core — you log a line, await a fetch, then log another. In what order do they appear, and why?",
+    "You've got the core. You log a line, await a fetch, then log another. In what order do they appear, and why?",
   fallbackRepairQuestion:
     "Now try it: you need three independent API calls to finish as fast as possible. How do you write it, and why?",
 };
 
-/** The curated library — authored lessons whose content is the teaching source of truth. */
+/** The curated library - authored lessons whose content is the teaching source of truth. */
 export const LESSONS: Lesson[] = [CLOSURES_LESSON, INDEXES_LESSON, ASYNC_LESSON];
 
 export function lessonBySlug(slug: string): Lesson | undefined {

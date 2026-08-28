@@ -29,7 +29,7 @@ const STATE_WORD: Record<ClaimState, string> = {
 const VERDICT: Record<Verdict, { title: string; line: string; next: string }> = {
   solid_understanding: {
     title: "Nailed it.",
-    line: "Your explanation held up under pressure — every claim carried its weight.",
+    line: "Your explanation held up under pressure. Every claim carried its weight.",
     next: "Come back to a harder concept while this is fresh.",
   },
   understanding_strengthened: {
@@ -39,7 +39,7 @@ const VERDICT: Record<Verdict, { title: string; line: string; next: string }> = 
   },
   gap_to_revisit: {
     title: "One to come back to.",
-    line: "You made real progress — part of this just needs another pass.",
+    line: "You made real progress. Part of this just needs another pass.",
     next: "Circle back to the focus point when you've got a few minutes.",
   },
 };
@@ -111,7 +111,7 @@ export function DebriefRunner({
       if (result.error) {
         setError(result.error);
       } else {
-        // Persist only a good turn, and only then drop the sent draft — so a reload
+        // Persist only a good turn, and only then drop the sent draft - so a reload
         // mid-request keeps both the session and the unsent text.
         saveSession({ lesson: result.lesson ?? lesson, state: result.state, content: result.content });
         if (clearDraftKey) clearDraft(clearDraftKey);
@@ -180,7 +180,7 @@ export function DebriefRunner({
           Explain it like you&apos;re teaching a curious friend who&apos;s new to it.
         </p>
         <p className="mt-1 mb-5 text-sm text-muted-ink">
-          Your own words are perfect — don&apos;t overthink it.
+          Your own words are perfect. Don&apos;t overthink it.
         </p>
         {inputArea(
           "explanation",
@@ -296,7 +296,7 @@ export function DebriefRunner({
       justWorked?.state === "solid"
         ? `${justWorked.shortLabel} is solid now.`
         : justWorked
-          ? `${justWorked.shortLabel} is clearer — we can come back to it.`
+          ? `${justWorked.shortLabel} is clearer. We can come back to it.`
           : "Good progress.";
     left = (
       <>

@@ -9,7 +9,7 @@ import { loadDraft, saveDraft } from "@/lib/session-store";
  *  that turns Focus Amber when active, monospace body. If given a draftKey, the
  *  unsent text is autosaved and restored on reload (the runner clears it on a good turn). */
 export function ResponseField({
-  placeholder = "Your own words are fine — take your time.",
+  placeholder = "Your own words are fine. Take your time.",
   submitLabel = "Submit",
   filename = "~/response.md",
   draftKey,

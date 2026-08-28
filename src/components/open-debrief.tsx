@@ -12,12 +12,45 @@ import type { Lesson } from "@/core/types";
 
 const CONCEPT_KEY = draftKey("new", "concept");
 
+// Ambient examples that cycle in the input, deliberately mixed across domains so
+// the entry never reads as dev-only. First one is the reduced-motion fallback.
+const PLACEHOLDERS = [
+  "How do database indexes work?",
+  "Why does compound interest grow the way it does?",
+  "What actually happens when your immune system sees a vaccine?",
+  "How does a closure remember its variables?",
+  "Why does a market price settle where it does?",
+  "What does await actually do while it's waiting?",
+];
+
 /** Open-concept entry: name a concept, Groq maps the claims, then run the debrief on it. */
 export function OpenDebrief() {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [concept, setConcept] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phIdx, setPhIdx] = useState(0);
+  const [phShown, setPhShown] = useState(true);
+  const [focused, setFocused] = useState(false);
+
+  // Cycle the placeholder while the field is empty and idle. Stops on focus or
+  // typing, and doesn't run under prefers-reduced-motion (stays on the first phrase).
+  useEffect(() => {
+    if (lesson || focused || concept.trim() !== "") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    let swap: number | undefined;
+    const tick = window.setInterval(() => {
+      setPhShown(false);
+      swap = window.setTimeout(() => {
+        setPhIdx((i) => (i + 1) % PLACEHOLDERS.length);
+        setPhShown(true);
+      }, 300);
+    }, 3000);
+    return () => {
+      window.clearInterval(tick);
+      if (swap) window.clearTimeout(swap);
+    };
+  }, [lesson, focused, concept]);
 
   // On reload: resume an in-progress open session if there is one, otherwise
   // restore the half-typed concept. Browser-only, so it runs after mount.
@@ -96,14 +129,29 @@ export function OpenDebrief() {
         }}
         className="mt-10"
       >
-        <input
-          type="text"
-          value={concept}
-          onChange={(e) => updateConcept(e.target.value)}
-          placeholder="e.g. how database indexes work"
-          disabled={pending}
-          className="w-full border border-line bg-surface px-4 py-3.5 font-mono text-sm text-ivory transition-colors placeholder:text-ghost focus-visible:border-amber focus-visible:outline-none disabled:opacity-60"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            value={concept}
+            onChange={(e) => updateConcept(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            placeholder=""
+            aria-label="The concept you want to debrief"
+            disabled={pending}
+            className="relative w-full border border-line bg-surface px-4 py-3.5 font-mono text-sm text-ivory transition-colors focus-visible:border-amber focus-visible:outline-none disabled:opacity-60"
+          />
+          {concept.trim() === "" && (
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-0 flex items-center truncate px-4 font-mono text-sm text-ghost transition-opacity duration-300 ${
+                phShown ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              {PLACEHOLDERS[phIdx]}
+            </span>
+          )}
+        </div>
         <div className="mt-5">
           {pending ? (
             <Thinking label="Setting things up…" />

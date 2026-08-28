@@ -157,8 +157,179 @@ export const ASYNC_LESSON: Lesson = {
     "Now try it: you need three independent API calls to finish as fast as possible. How do you write it, and why?",
 };
 
+export const COMPOUND_INTEREST_LESSON: Lesson = {
+  slug: "compound-interest",
+  title: "Compound interest",
+  mode: "authored",
+  objective:
+    "Explain what compound interest really is, why when you add money matters as much as the rate, and why small rate differences grow into large gaps over time.",
+  difficulty: "foundations",
+  claims: [
+    {
+      id: "interest-on-interest",
+      claim: "Compound interest pays interest on the interest already earned, not just on the original amount, so the balance grows on an ever-larger base.",
+      shortLabel: "Interest on the interest",
+      whyItMatters: "It's the difference between growth that accelerates and growth that stays flat.",
+      teachingNote: "Each period's interest is added to the balance, and the next period's interest is calculated on that new, larger balance. Simple interest only ever pays on the original principal.",
+      commonMisconception: "Compound interest is just a fixed percentage added each year, the same as simple interest.",
+    },
+    {
+      id: "timing",
+      claim: "When you add money changes the outcome as much as the rate, because earlier money compounds for longer.",
+      shortLabel: "Timing, not just amount",
+      whyItMatters: "It's why starting early can beat contributing more later.",
+      teachingNote: "A dollar added early earns interest for every period that follows; the same dollar added late earns for far fewer. The extra years, not just the extra dollars, do the work.",
+      commonMisconception: "Only the interest rate and the total amount contributed decide the final balance.",
+    },
+    {
+      id: "small-rates",
+      claim: "A small difference in rate compounds into a large gap over a long horizon, because the effect multiplies every period.",
+      shortLabel: "Small rates, big gaps",
+      whyItMatters: "It's why a 1% fee, or a 1% higher return, matters far more than it sounds.",
+      teachingNote: "Because growth is multiplicative, a slightly higher rate is applied to a balance that is itself growing faster each period, so the gap widens the longer you wait.",
+      commonMisconception: "A 1% difference in rate makes only about a 1% difference at the end.",
+    },
+  ],
+  workedExample:
+    "$1,000 at 7% for 30 years grows to about $7,600, not the $3,100 that simple interest at 7% would give. The extra comes from interest earning its own interest.",
+  counterexample:
+    "Two people invest the same total, but one starts ten years earlier and then stops adding money; the early starter often ends up ahead despite contributing less.",
+  applicationScenarios: [
+    "Two funds return 6% and 7% over 40 years. Roughly how far apart do they end up, and why is it more than you'd guess?",
+  ],
+  misconceptions: [
+    "Compound interest is a flat percentage each year.",
+    "Only the rate and total contributed matter, not the timing.",
+  ],
+  fallbackWeaknessQuestion:
+    "This year's interest is calculated on what, exactly, the original amount or something bigger?",
+  fallbackUnaddressedQuestion:
+    "You haven't touched why timing matters yet. Walk me through why money added earlier is worth more.",
+  fallbackVerificationQuestion:
+    "You've got the core. Two people save the same total, but one starts ten years earlier and then stops. Who ends up ahead, and why?",
+  fallbackRepairQuestion:
+    "Now put it to work: a fund charges a 1% yearly fee over a 40-year investment. Why does that cost far more than 1% of your money?",
+};
+
+export const VACCINES_LESSON: Lesson = {
+  slug: "how-vaccines-work",
+  title: "How vaccines work",
+  mode: "authored",
+  objective:
+    "Explain what a vaccine actually shows the immune system, what it leaves behind, and why the next real exposure goes differently.",
+  difficulty: "foundations",
+  claims: [
+    {
+      id: "what-its-shown",
+      claim: "A vaccine shows the immune system a harmless preview of a pathogen's distinctive markers (its antigens), not necessarily the live or weakened pathogen itself.",
+      shortLabel: "A preview of the markers",
+      whyItMatters: "It's how a vaccine can train you without making you sick.",
+      teachingNote: "What the immune system learns to recognize is the antigen, a signature piece of the pathogen. Vaccines deliver that signature in several forms (a protein, genetic instructions to make one, an inactivated fragment), not only as a weakened whole virus.",
+      commonMisconception: "Every vaccine is just a weakened version of the actual virus.",
+    },
+    {
+      id: "memory-cells",
+      claim: "After the response, the body keeps memory cells for that specific antigen, which a first-ever exposure doesn't have.",
+      shortLabel: "Memory cells stay behind",
+      whyItMatters: "It's what immunity actually is: a standing readiness, not just leftover antibodies.",
+      teachingNote: "A first exposure is slow because the body builds a response from scratch. Vaccination leaves behind memory B and T cells, so the recognition is already in place before the real thing arrives.",
+      commonMisconception: "Immunity is just the antibodies from the vaccine still floating around.",
+    },
+    {
+      id: "second-exposure",
+      claim: "A later real exposure is met faster and harder, because memory cells recognize the antigen and respond before the pathogen can take hold.",
+      shortLabel: "The second time is faster",
+      whyItMatters: "It's why a vaccinated person can meet the real pathogen and barely notice.",
+      teachingNote: "With memory cells primed, the second response ramps up in a day or two instead of a week, often stopping the infection before symptoms appear.",
+      commonMisconception: "A vaccine keeps the pathogen out entirely, like a physical shield.",
+    },
+  ],
+  workedExample:
+    "A flu shot carries inactivated virus or just its surface proteins; your body learns those proteins and keeps memory cells, so it recognizes the real flu fast if it shows up.",
+  counterexample:
+    "A brand-new pathogen you've never seen and never been vaccinated against triggers the slow first-time response, which is why it can make you much sicker.",
+  applicationScenarios: [
+    "Someone gets a vaccine, then meets the real pathogen a year later and barely gets sick. Walk through what happened inside them.",
+  ],
+  misconceptions: [
+    "Every vaccine is a weakened live virus.",
+    "Immunity is just leftover antibodies.",
+    "A vaccine physically blocks the pathogen from entering.",
+  ],
+  fallbackWeaknessQuestion:
+    "What is the immune system actually learning to recognize from a vaccine, the whole virus or something more specific?",
+  fallbackUnaddressedQuestion:
+    "You haven't said what the vaccine leaves behind. What's different about your immune system afterward?",
+  fallbackVerificationQuestion:
+    "You've got the core. A vaccinated person meets the real pathogen a year later and barely gets sick. What happened inside them, step by step?",
+  fallbackRepairQuestion:
+    "Now put it to work: why does a second exposure to a pathogen usually go so much better than the first?",
+};
+
+export const SUPPLY_DEMAND_LESSON: Lesson = {
+  slug: "supply-and-demand",
+  title: "Supply and demand",
+  mode: "authored",
+  objective:
+    "Explain why a market price settles where it does, what happens when it's off that point, and the difference between a shift in demand and a movement along the curve.",
+  difficulty: "foundations",
+  claims: [
+    {
+      id: "why-it-settles",
+      claim: "A price settles where the quantity buyers want equals the quantity sellers offer, because that's the only price with no leftover pressure to move it.",
+      shortLabel: "Where pressure disappears",
+      whyItMatters: "It reframes the crossing point as a balance of forces, not just an intersection on a graph.",
+      teachingNote: "Equilibrium isn't special because two lines cross; it's special because at any other price there's a surplus or a shortage that pushes the price back toward it.",
+      commonMisconception: "The price settles at the crossing point simply because that's where the two lines meet on the graph.",
+    },
+    {
+      id: "away-from-it",
+      claim: "Away from equilibrium there's a surplus or a shortage, and that imbalance is exactly what pushes the price back toward equilibrium.",
+      shortLabel: "Off-balance self-corrects",
+      whyItMatters: "It's why equilibrium is stable rather than arbitrary.",
+      teachingNote: "Above equilibrium, unsold goods pile up and sellers cut prices; below it, buyers compete for scarce goods and prices rise. The deviation itself creates the pressure back.",
+      commonMisconception: "Prices away from the crossing point just stay there; nothing makes them move.",
+    },
+    {
+      id: "shift-vs-move",
+      claim: "A shift of the demand curve (the whole relationship changes) is different from a movement along it (a response to the good's own price).",
+      shortLabel: "Shift vs. move along",
+      whyItMatters: "Confusing the two leads to circular reasoning about price and quantity.",
+      teachingNote: "A change in the good's own price moves you ALONG the curve. A change in something else (income, tastes, the price of a substitute) shifts the WHOLE curve. Only shifts change the equilibrium price.",
+      commonMisconception: "Any change in how much people buy means the demand curve shifted.",
+    },
+  ],
+  workedExample:
+    "A frost destroys half the coffee harvest: supply shifts left, so at the old price there's now a shortage, and the price rises to a new equilibrium.",
+  counterexample:
+    "Coffee gets more expensive and people buy less. That's a movement along the demand curve, not a shift; demand itself didn't change.",
+  applicationScenarios: [
+    "A study makes coffee trendy and demand jumps. Walk through what happens to price and quantity, and say whether the curve shifted or you moved along it.",
+  ],
+  misconceptions: [
+    "The price settles at the crossing just because the lines meet.",
+    "Prices off the equilibrium just stay put.",
+    "Any change in quantity bought means demand shifted.",
+  ],
+  fallbackWeaknessQuestion:
+    "What's true at the settling price that isn't true at any other price?",
+  fallbackUnaddressedQuestion:
+    "You haven't touched what happens when the price is too high or too low. Walk me through it.",
+  fallbackVerificationQuestion:
+    "You've got the core. A frost wipes out half the coffee crop. What happens to the price, and why doesn't it just stay where it was?",
+  fallbackRepairQuestion:
+    "Now put it to work: coffee gets pricier and people buy less. Did the demand curve shift, or did you move along it, and why?",
+};
+
 /** The curated library - authored lessons whose content is the teaching source of truth. */
-export const LESSONS: Lesson[] = [CLOSURES_LESSON, INDEXES_LESSON, ASYNC_LESSON];
+export const LESSONS: Lesson[] = [
+  CLOSURES_LESSON,
+  INDEXES_LESSON,
+  ASYNC_LESSON,
+  COMPOUND_INTEREST_LESSON,
+  VACCINES_LESSON,
+  SUPPLY_DEMAND_LESSON,
+];
 
 export function lessonBySlug(slug: string): Lesson | undefined {
   return LESSONS.find((l) => l.slug === slug);

@@ -62,6 +62,16 @@ function normalizeFocusEval(e: {
 const FLAGSHIP: GroqModel = "openai/gpt-oss-120b"; // reliability-critical: evaluate + scaffold
 const FAST: GroqModel = "openai/gpt-oss-20b"; //  generative: question / intervention / repair
 
+/**
+ * max_tokens has to cover the model's REASONING tokens, not just the JSON it
+ * emits. These gpt-oss models spend 150-400 reasoning tokens before writing a
+ * one-line question; when the budget runs out mid-thought the response comes back
+ * as a Groq 400 `json_validate_failed` with an empty `failed_generation`, which
+ * reads like a schema problem but is really a truncation. Measured: at 200 the
+ * probe generators failed most calls, at 1200 they pass. Keep real headroom.
+ */
+const GENERATIVE_MAX_TOKENS = 1200;
+
 // Shared voice for everything the learner reads. Evaluators stay neutral; the
 // generative prompts (questions, teaching) speak in this coach voice.
 const TONE =
@@ -176,12 +186,24 @@ function claimsBlock(lesson: Lesson): string {
   return lesson.claims
     .map(
       (c) =>
-        `- id: ${c.id}\n  claim: ${c.claim}${
-          c.commonMisconception ? `\n  watch for: ${c.commonMisconception}` : ""
+        `- id: ${c.id}\n  claim (TRUE): ${c.claim}${
+          c.commonMisconception ? `\n  misconception (FALSE): ${c.commonMisconception}` : ""
         }`,
     )
     .join("\n");
 }
+
+/**
+ * Both evaluators are handed the claim AND its common misconception, and the
+ * misconception is the dangerous half: unlabelled, the model reads it as another
+ * statement to check the learner against, and then scores a CORRECT answer as
+ * needs_attention because it "contradicts" the misconception. Measured on the
+ * compound-interest fee claim: 0/4 correct with an unlabelled "Watch for:" line,
+ * 4/4 once each side is explicitly marked TRUE / FALSE. Never pass a misconception
+ * to the model without saying it is false.
+ */
+const CLAIM_POLARITY =
+  "Each claim is given as claim (TRUE), sometimes with a misconception (FALSE). Judge the learner ONLY against the TRUE claim. A FALSE misconception is listed so you can recognise it, never as something to check the learner against: an answer that asserts the misconception is needs_attention, and an answer that correctly rejects it is evidence FOR the claim.";
 
 // --- 1. evaluateExplanation (flagship) ------------------------------------
 export async function evaluateExplanation(
@@ -191,6 +213,7 @@ export async function evaluateExplanation(
   const system = [
     "You are a careful evaluator in a teach-back learning tool.",
     "Given a concept's essential claims and a learner's explanation, judge EACH claim's state from the explanation ALONE:",
+    CLAIM_POLARITY,
     "- solid: clearly and correctly explained.",
     "- unclear: mentioned but vague or partial, not specifically wrong.",
     "- needs_attention: the explanation says something that CONTRADICTS the claim (a real misconception).",
@@ -241,7 +264,7 @@ export async function generateWeaknessQuestion(
     schemaName: "curious_question",
     jsonSchema: asSchema(CURIOUS_REQUEST_SCHEMA),
     temperature: 0.4,
-    maxTokens: 200,
+    maxTokens: GENERATIVE_MAX_TOKENS,
   });
   return curiousQuestionSchema.parse(raw);
 }
@@ -267,7 +290,7 @@ export async function generateUnaddressedQuestion(
     schemaName: "curious_question",
     jsonSchema: asSchema(CURIOUS_REQUEST_SCHEMA),
     temperature: 0.4,
-    maxTokens: 200,
+    maxTokens: GENERATIVE_MAX_TOKENS,
   });
   return curiousQuestionSchema.parse(raw);
 }
@@ -294,7 +317,7 @@ export async function generateVerificationQuestion(
     schemaName: "curious_question",
     jsonSchema: asSchema(CURIOUS_REQUEST_SCHEMA),
     temperature: 0.4,
-    maxTokens: 200,
+    maxTokens: GENERATIVE_MAX_TOKENS,
   });
   return curiousQuestionSchema.parse(raw);
 }
@@ -308,15 +331,18 @@ export async function evaluateFocusAnswer(
   const system = [
     "You are a careful evaluator in a teach-back tool.",
     "Judge ONLY the given claim, from the learner's answer:",
+    CLAIM_POLARITY,
     "- solid: now clearly and correctly reasoned.",
     "- unclear: vague or partial.",
-    "- needs_attention: contradicts the claim (a real misconception).",
+    "- needs_attention: contradicts the TRUE claim (a real misconception).",
     "- untested: does not address the claim.",
     "For needs_attention ONLY, set evidenceQuote to the exact sentence copied verbatim from the answer. Otherwise evidenceQuote MUST be null. One-sentence rationale. Never invent quotes.",
   ].join("\n");
 
-  const user = `Concept: ${lesson.title}\nClaim: ${focusClaim.claim}${
-    focusClaim.commonMisconception ? `\nWatch for: ${focusClaim.commonMisconception}` : ""
+  const user = `Concept: ${lesson.title}\nclaim (TRUE): ${focusClaim.claim}${
+    focusClaim.commonMisconception
+      ? `\nmisconception (FALSE): ${focusClaim.commonMisconception}`
+      : ""
   }\n\nLearner's answer:\n"""${answer}"""`;
 
   const raw = await callGroqStructured({
@@ -356,7 +382,7 @@ export async function generateTeachingIntervention(
     schemaName: "teaching_intervention",
     jsonSchema: asSchema(TEACHING_REQUEST_SCHEMA),
     temperature: 0.3,
-    maxTokens: 400,
+    maxTokens: GENERATIVE_MAX_TOKENS,
   });
   return teachingInterventionSchema.parse(raw);
 }
@@ -385,7 +411,7 @@ export async function generateRepairQuestion(
     schemaName: "repair_question",
     jsonSchema: asSchema(REPAIR_REQUEST_SCHEMA),
     temperature: 0.4,
-    maxTokens: 200,
+    maxTokens: GENERATIVE_MAX_TOKENS,
   });
   return repairQuestionSchema.parse(raw);
 }
@@ -402,7 +428,7 @@ export async function decomposeAndEvaluate(
     "You map a learner's explanation into its essential claims AND judge each one, in a single pass, for a teach-back learning tool. You are not authoring a textbook curriculum.",
     "CLAIMS: From the topic and the learner's OWN explanation, identify 3 to 5 claims that a complete, correct version of THIS explanation would need to make. Base them on the framing and vocabulary the learner actually used - each claim should trace back to something they said or gestured at - not on a standard textbook breakdown of the topic. Add a claim the learner omitted ONLY if it is genuinely essential to correctness (not merely a deeper detail).",
     "For each claim: id (exactly 'c1','c2',… in order), shortLabel (2 to 4 words for a diagram), claim (one clear sentence), whyItMatters (one sentence), teachingNote (a one-sentence correction of the likely misunderstanding), commonMisconception (a common wrong belief, or null).",
-    "EVALUATION: Then judge EACH claim from the explanation ALONE, returning exactly one evaluation per claim whose sourceClaimId is that claim's id:",
+    "EVALUATION: Then judge EACH claim from the explanation ALONE, returning exactly one evaluation per claim whose sourceClaimId is that claim's id. Judge against the claim you wrote, never against its commonMisconception (that one is false by construction):",
     "- solid: clearly and correctly explained.",
     "- unclear: mentioned but vague or partial, not specifically wrong.",
     "- needs_attention: the explanation says something that CONTRADICTS the claim (a real misconception).",

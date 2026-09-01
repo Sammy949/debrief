@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy Policy"
-      updated="August 2026"
+      updated="September 2026"
       intro="Debrief is a teach-back learning tool. It works without an account, and it keeps as little about you as it can. This page explains what happens to what you write."
       sections={[
         {
@@ -33,6 +33,19 @@ export default function PrivacyPage() {
               and we do not persist your explanations on a server once the
               session ends. If accounts are added later, this page will be
               updated to describe what is saved and how to delete it.
+            </p>
+          ),
+        },
+        {
+          heading: "Analytics",
+          body: (
+            <p>
+              Debrief counts page views so we know which lessons people
+              actually use. It runs on our own analytics server, sets no
+              cookies, and records only the page, the referring link, your
+              browser language and screen size, never your explanations. It
+              cannot follow you to other sites, and if your browser sends a Do
+              Not Track signal, nothing is recorded at all.
             </p>
           ),
         },

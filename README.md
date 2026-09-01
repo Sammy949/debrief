@@ -36,11 +36,13 @@ Prerequisites: **Node 20+** and **pnpm**. You'll need a **Groq API key** ([conso
 
 ```bash
 pnpm install
-echo "GROQ_API_KEY=your_key_here" > .env.local
+cp .env.example .env.local   # then fill in GROQ_API_KEY
 pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+The analytics variables in `.env.example` are optional: left blank, Debrief loads no tracker and reports nowhere. Set them to point a deployment at your own analytics server.
 
 ### Scripts
 

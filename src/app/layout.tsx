@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
+import { Analytics } from "@/components/analytics";
 import "./globals.css";
 
 // The concept voice - a distinctive editorial serif (self-hosted, Fontshare Sentient).
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <div className="flex min-h-screen flex-col">{children}</div>
+        <Analytics />
       </body>
     </html>
   );
